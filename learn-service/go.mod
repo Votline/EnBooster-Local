@@ -4,6 +4,7 @@ go 1.26.3
 
 require (
 	github.com/Masterminds/squirrel v1.5.4 // indirect
+	github.com/Votline/EnBooster-Local/protos v0.0.2 // indirect
 	github.com/Votline/EnBooster/protos v1.2.6 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect

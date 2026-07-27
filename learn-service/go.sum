@@ -1,6 +1,8 @@
 filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
 github.com/Masterminds/squirrel v1.5.4 h1:uUcX/aBc8O7Fg9kaISIUsHXdKuqehiXAMQTYX8afzqM=
 github.com/Masterminds/squirrel v1.5.4/go.mod h1:NNaOrjSoIDfDA40n7sr2tPNZRfjzjA400rg+riTZj10=
+github.com/Votline/EnBooster-Local/protos v0.0.2 h1:cav0UYpKPKtI0G/ZLpRZstCKJDNEDI8un5MDW/g7sQk=
+github.com/Votline/EnBooster-Local/protos v0.0.2/go.mod h1:Tok4QByeEzwhW6tQYsMSGiv3gn3f8Q8fxzElcZ2hh84=
 github.com/Votline/EnBooster/protos v0.0.3 h1:Gh/i1f4l169CsHGvHf3NX2ql8wXEMJ2Fzwu+8gaH9Zs=
 github.com/Votline/EnBooster/protos v0.0.3/go.mod h1:SEdrv6X/Gj/3ghZkiCxRAvIwR0diDo3rj5c4Dd1JX4I=
 github.com/Votline/EnBooster/protos v0.0.4 h1:bZ5CaC+eDmo2rNzvmSl899ia1MujOO3pUnmxUwuOIg8=
