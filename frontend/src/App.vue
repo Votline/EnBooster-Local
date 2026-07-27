@@ -33,7 +33,6 @@ const onSend = (text) => {
 <template>
     <Background>
         <MainBox>
-            <!-- 3. Навесили ref="chatContainer" -->
             <div ref="chatContainer" class="messages-container">
                 <MessageItem 
                     v-for="msg in messages" 
