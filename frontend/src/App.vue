@@ -1,17 +1,13 @@
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, onMounted } from 'vue'
 import Background from './components/Background.vue'
 import MainBox from './components/MainBox.vue'
 import InputField from './components/InputField.vue'
 import MessageItem from './components/MessageItem.vue'
 
 const chatContainer = ref(null)
-
-const messages = ref([
-    { id: 1, text: 'Здорово! Чем помочь?', isMe: false },
-    { id: 2, text: 'Привет, да вот верстаю чат на Vue', isMe: true },
-    { id: 3, text: 'Красава, вырисовывается четко.', isMe: false }
-])
+const messages = ref([])
+let socket = null
 
 const scrollToBottom = async () => {
     await nextTick()
@@ -20,13 +16,45 @@ const scrollToBottom = async () => {
     }
 }
 
+onMounted(() => {
+    socket = new WebSocket('ws://localhost:8080/ws')
+
+    socket.onopen = () => {
+        console.log('🟢 WS соединен с Go!')
+    }
+
+    socket.onmessage = (event) => {
+        try {
+            const botMsg = JSON.parse(event.data)
+            messages.value.push(botMsg)
+            scrollToBottom()
+        } catch (err) {
+            console.error('Ошибка парсинга JSON:', err)
+        }
+    }
+
+    socket.onerror = (err) => {
+        console.error('🔴 Ошибка WS:', err)
+    }
+})
+
 const onSend = (text) => {
-    messages.value.push({
+    if (!text.trim()) return
+
+    const userMsg = {
         id: Date.now(),
         text: text,
         isMe: true
-    })
+    }
+
+    messages.value.push(userMsg)
     scrollToBottom()
+
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(userMsg))
+    } else {
+        console.error('Сокет не активен!')
+    }
 }
 </script>
 
