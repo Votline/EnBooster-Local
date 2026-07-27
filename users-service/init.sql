@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS users (
+	uuid BIGINT PRIMARY KEY,
+	chat_id BIGINT NOT NULL,
+	id SERIAL UNIQUE,
+	best_theme TEXT NOT NULL DEFAULT '',
+	best_theme_counter INT NOT NULL DEFAULT 0,
+	worst_theme TEXT NOT NULL DEFAULT '',
+	worst_theme_counter INT NOT NULL DEFAULT 0,
+	level TEXT NOT NULL DEFAULT 'A1',
+	task_id INT NOT NULL DEFAULT 1,
+	streak INT NOT NULL DEFAULT 0,
+	last_done_day BIGINT NOT NULL DEFAULT 0,
+	system_prompt TEXT NOT NULL DEFAULT ''
+);

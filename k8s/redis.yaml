@@ -1,0 +1,174 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-sm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-sm
+  template:
+    metadata:
+      labels:
+        app: redis-sm
+    spec:
+      containers:
+        - name: redis-sm
+          image: redis:alpine
+          env:
+            - name: REDIS_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: enbooster-secrets
+                  key: REDIS_SM_PASSWORD
+          args:
+            - redis-server
+            - "--requirepass"
+            - "$(REDIS_PASS)"
+            - "--loglevel"
+            - "warning"
+          ports:
+            - containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-sm
+spec:
+  selector:
+    app: redis-sm
+  ports:
+    - port: 6379
+      targetPort: 6379
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-lrn
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-lrn
+  template:
+    metadata:
+      labels:
+        app: redis-lrn
+    spec:
+      containers:
+        - name: redis-lrn
+          image: redis:alpine
+          env:
+            - name: REDIS_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: enbooster-secrets
+                  key: REDIS_LRN_PASSWORD
+          args:
+            - redis-server
+            - "--requirepass"
+            - "$(REDIS_PASS)"
+            - "--loglevel"
+            - "warning"
+          ports:
+            - containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-lrn
+spec:
+  selector:
+    app: redis-lrn
+  ports:
+    - port: 6379
+      targetPort: 6379
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-rl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-rl
+  template:
+    metadata:
+      labels:
+        app: redis-rl
+    spec:
+      containers:
+        - name: redis-rl
+          image: redis:alpine
+          env:
+            - name: REDIS_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: enbooster-secrets
+                  key: REDIS_RL_PASSWORD
+          args:
+            - redis-server
+            - "--requirepass"
+            - "$(REDIS_PASS)"
+            - "--loglevel"
+            - "warning"
+          ports:
+            - containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-rl
+spec:
+  selector:
+    app: redis-rl
+  ports:
+    - port: 6379
+      targetPort: 6379
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-ai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-ai
+  template:
+    metadata:
+      labels:
+        app: redis-ai
+    spec:
+      containers:
+        - name: redis-ai
+          image: redis:alpine
+          env:
+            - name: REDIS_PASS
+              valueFrom:
+                configMapKeyRef:
+                  name: aisrv-config
+                  key: REDIS_AI_PASSWORD
+          args:
+            - redis-server
+            - "--requirepass"
+            - "$(REDIS_PASS)"
+            - "--loglevel"
+            - "warning"
+          ports:
+            - containerPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-ai
+spec:
+  selector:
+    app: redis-ai
+  ports:
+    - port: 6379
+      targetPort: 6379

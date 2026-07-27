@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: users-service
+  template:
+    metadata:
+      labels:
+        app: users-service
+    spec:
+      initContainers:
+        - name: wait-for-kafka
+          image: apache/kafka:3.7.0
+          command:
+            - sh
+            - -c
+            - |
+              until /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list; do
+                echo "Waiting for kafka"
+                sleep 2
+              done
+              echo "Kafka is done"
+      containers:
+        - name: users-service
+          image: users-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 50051
+          envFrom:
+            - configMapRef:
+                name: users-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-service
+spec:
+  selector:
+    app: users-service
+  ports:
+    - protocol: TCP
+      port: 50051
+      targetPort: 50051

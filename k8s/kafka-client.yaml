@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-client-config
+data:
+  client.properties: |
+    security.protocol=SSL
+    ssl.truststore.location=/etc/kafka-client/kafka.truststore.p12
+    ssl.truststore.type=PKCS12
+    ssl.truststore.password=kafkapassword
+    ssl.endpoint.identification.algorithm=

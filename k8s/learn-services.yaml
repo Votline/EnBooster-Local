@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: learn-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: learn-service
+  template:
+    metadata:
+      labels:
+        app: learn-service
+    spec:
+      containers:
+      - name: learn-service
+        image: learn-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 50052
+        envFrom:
+        - configMapRef:
+            name: learn-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: learn-service
+spec:
+  selector:
+    app: learn-service
+  ports:
+    - protocol: TCP
+      port: 50052
+      targetPort: 50052

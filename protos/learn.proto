@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package learn;
+option go_package = "generated-learn/;learnservice";
+
+// TASKS MESSAGES
+
+message NewTasksReq {
+  string json_data = 1; // full pages
+  string request_trace = 2;
+}
+message NewTasksRes {
+  int32 inserted = 1;
+}
+
+message GetTasksReq {
+  string level = 1;
+  int32 position = 2;
+  int32 limit = 3;
+  string request_trace = 4;
+}
+message GetTasksRes {
+  string data = 1;
+  // contains task, level and answer
+  // returns json object (many tasks)
+}
+
+message DelTaskReq {
+  string level = 1;
+  int32 position = 2;
+  string request_trace = 3;
+}
+message DelTaskRes {}
+
+// WORDS MESSAGES
+
+message NewWordsReq {
+  string json_data = 1; // many words with explanations in json format
+  string request_trace = 2;
+}
+message NewWordsRes {
+  int32 inserted = 1;
+}
+
+message GetWordsReq {
+  string search_data = 1; // word or serial number
+  int32 limit = 2;
+  string request_trace = 3;
+}
+message GetWordsRes {
+  string data = 1;
+  // contains word,explanations, level,
+  // first letter and serial number
+  // returns json object (many data)
+}
+
+message GetWordsWithTargetReq {
+  string user_word = 1;
+  string first_letter = 2;
+  int32 limit = 3;
+  int32 offset_id = 4;
+  string request_trace = 5;
+}
+message GetWordsWithTargetRes {
+  string data = 1; // json as 'GetWordsRes'
+  bool found = 2; // user_word in data?
+}
+
+message DelWordReq {
+  string word = 1; // 1 word
+  int32 serial = 2; // 1 serial number
+  string request_trace = 3;
+}
+message DelWordRes {}
+
+service LearnService {
+  rpc NewTasks (NewTasksReq) returns (NewTasksRes);
+  rpc GetTasks (GetTasksReq) returns (GetTasksRes);
+  rpc DelTask (DelTaskReq) returns (DelTaskRes);
+
+  rpc NewWords (NewWordsReq) returns (NewWordsRes);
+  rpc GetWords (GetWordsReq) returns (GetWordsRes);
+  rpc GetWordsWithTarget (GetWordsWithTargetReq) returns (GetWordsWithTargetRes);
+  rpc DelWord (DelWordReq) returns (DelWordRes);
+}
