@@ -10,15 +10,20 @@ import (
 	"go.uber.org/zap"
 )
 
+// Server used for control and link http server with services
 type Server struct {
 	srv *http.Server
 	log *zap.Logger
 	wsh *delivery.WSHandler
 }
 
-func Setup(log *zap.Logger) *Server {
+func Setup(log *zap.Logger) (*Server, error) {
+	const op = "router.Setup"
+	wsh, err := delivery.NewWSH(log)
+	if err != nil {
+		return nil, fmt.Errorf("%s: create ws handler:%w", op, err)
+	}
 	mux := http.NewServeMux()
-	wsh := delivery.NewWSH(log)
 	wsh.RegisterRoutes(mux)
 
 	return &Server{
@@ -28,7 +33,7 @@ func Setup(log *zap.Logger) *Server {
 		},
 		log: log,
 		wsh: wsh,
-	}
+	}, nil
 }
 
 func (s *Server) Start() error {

@@ -13,5 +13,4 @@ FROM alpine:3.18
 WORKDIR /usersservice
 
 COPY --from=builder /build/usersservice/usersservice ./
-COPY --from=builder /build/usersservice/ssl ./ssl
 CMD ["./usersservice"]

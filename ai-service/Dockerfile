@@ -33,7 +33,6 @@ RUN pacman -Syu --noconfirm \
     && pacman -Scc --noconfirm
 
 COPY --from=builder /build/aiservice/aiservice ./
-COPY --from=builder /build/aiservice/ssl ./ssl
 
 COPY ai-service/scripts ./scripts
 RUN chmod +x ./scripts/rhvoice
