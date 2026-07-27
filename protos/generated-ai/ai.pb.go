@@ -23,10 +23,9 @@ const (
 
 type GenerateTextReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uuid          int64                  `protobuf:"varint,1,opt,name=uuid,proto3" json:"uuid,omitempty"`
-	Prompt        string                 `protobuf:"bytes,2,opt,name=prompt,proto3" json:"prompt,omitempty"`
-	SystemPrompt  string                 `protobuf:"bytes,3,opt,name=system_prompt,json=systemPrompt,proto3" json:"system_prompt,omitempty"`
-	RequestTrace  string                 `protobuf:"bytes,4,opt,name=request_trace,json=requestTrace,proto3" json:"request_trace,omitempty"`
+	Prompt        string                 `protobuf:"bytes,1,opt,name=prompt,proto3" json:"prompt,omitempty"`
+	SystemPrompt  string                 `protobuf:"bytes,2,opt,name=system_prompt,json=systemPrompt,proto3" json:"system_prompt,omitempty"`
+	RequestTrace  string                 `protobuf:"bytes,3,opt,name=request_trace,json=requestTrace,proto3" json:"request_trace,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -59,13 +58,6 @@ func (x *GenerateTextReq) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GenerateTextReq.ProtoReflect.Descriptor instead.
 func (*GenerateTextReq) Descriptor() ([]byte, []int) {
 	return file_ai_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *GenerateTextReq) GetUuid() int64 {
-	if x != nil {
-		return x.Uuid
-	}
-	return 0
 }
 
 func (x *GenerateTextReq) GetPrompt() string {
@@ -135,9 +127,8 @@ func (x *GenerateTextRes) GetText() string {
 
 type GenerateAudioReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uuid          int64                  `protobuf:"varint,1,opt,name=uuid,proto3" json:"uuid,omitempty"`
-	Text          string                 `protobuf:"bytes,2,opt,name=text,proto3" json:"text,omitempty"`
-	RequestTrace  string                 `protobuf:"bytes,3,opt,name=request_trace,json=requestTrace,proto3" json:"request_trace,omitempty"`
+	Text          string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
+	RequestTrace  string                 `protobuf:"bytes,2,opt,name=request_trace,json=requestTrace,proto3" json:"request_trace,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -170,13 +161,6 @@ func (x *GenerateAudioReq) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GenerateAudioReq.ProtoReflect.Descriptor instead.
 func (*GenerateAudioReq) Descriptor() ([]byte, []int) {
 	return file_ai_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *GenerateAudioReq) GetUuid() int64 {
-	if x != nil {
-		return x.Uuid
-	}
-	return 0
 }
 
 func (x *GenerateAudioReq) GetText() string {
@@ -239,9 +223,8 @@ func (x *GenerateAudioRes) GetAudioData() []byte {
 
 type RecognizeAudioReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Uuid          int64                  `protobuf:"varint,1,opt,name=uuid,proto3" json:"uuid,omitempty"`
-	AudioData     []byte                 `protobuf:"bytes,2,opt,name=audio_data,json=audioData,proto3" json:"audio_data,omitempty"`
-	RequestTrace  string                 `protobuf:"bytes,3,opt,name=request_trace,json=requestTrace,proto3" json:"request_trace,omitempty"`
+	AudioData     []byte                 `protobuf:"bytes,1,opt,name=audio_data,json=audioData,proto3" json:"audio_data,omitempty"`
+	RequestTrace  string                 `protobuf:"bytes,2,opt,name=request_trace,json=requestTrace,proto3" json:"request_trace,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -274,13 +257,6 @@ func (x *RecognizeAudioReq) ProtoReflect() protoreflect.Message {
 // Deprecated: Use RecognizeAudioReq.ProtoReflect.Descriptor instead.
 func (*RecognizeAudioReq) Descriptor() ([]byte, []int) {
 	return file_ai_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *RecognizeAudioReq) GetUuid() int64 {
-	if x != nil {
-		return x.Uuid
-	}
-	return 0
 }
 
 func (x *RecognizeAudioReq) GetAudioData() []byte {
@@ -433,26 +409,23 @@ var File_ai_proto protoreflect.FileDescriptor
 
 const file_ai_proto_rawDesc = "" +
 	"\n" +
-	"\bai.proto\x12\x02ai\"\x87\x01\n" +
-	"\x0fGenerateTextReq\x12\x12\n" +
-	"\x04uuid\x18\x01 \x01(\x03R\x04uuid\x12\x16\n" +
-	"\x06prompt\x18\x02 \x01(\tR\x06prompt\x12#\n" +
-	"\rsystem_prompt\x18\x03 \x01(\tR\fsystemPrompt\x12#\n" +
-	"\rrequest_trace\x18\x04 \x01(\tR\frequestTrace\"%\n" +
+	"\bai.proto\x12\x02ai\"s\n" +
+	"\x0fGenerateTextReq\x12\x16\n" +
+	"\x06prompt\x18\x01 \x01(\tR\x06prompt\x12#\n" +
+	"\rsystem_prompt\x18\x02 \x01(\tR\fsystemPrompt\x12#\n" +
+	"\rrequest_trace\x18\x03 \x01(\tR\frequestTrace\"%\n" +
 	"\x0fGenerateTextRes\x12\x12\n" +
-	"\x04text\x18\x01 \x01(\tR\x04text\"_\n" +
+	"\x04text\x18\x01 \x01(\tR\x04text\"K\n" +
 	"\x10GenerateAudioReq\x12\x12\n" +
-	"\x04uuid\x18\x01 \x01(\x03R\x04uuid\x12\x12\n" +
-	"\x04text\x18\x02 \x01(\tR\x04text\x12#\n" +
-	"\rrequest_trace\x18\x03 \x01(\tR\frequestTrace\"1\n" +
+	"\x04text\x18\x01 \x01(\tR\x04text\x12#\n" +
+	"\rrequest_trace\x18\x02 \x01(\tR\frequestTrace\"1\n" +
 	"\x10GenerateAudioRes\x12\x1d\n" +
 	"\n" +
-	"audio_data\x18\x01 \x01(\fR\taudioData\"k\n" +
-	"\x11RecognizeAudioReq\x12\x12\n" +
-	"\x04uuid\x18\x01 \x01(\x03R\x04uuid\x12\x1d\n" +
+	"audio_data\x18\x01 \x01(\fR\taudioData\"W\n" +
+	"\x11RecognizeAudioReq\x12\x1d\n" +
 	"\n" +
-	"audio_data\x18\x02 \x01(\fR\taudioData\x12#\n" +
-	"\rrequest_trace\x18\x03 \x01(\tR\frequestTrace\"'\n" +
+	"audio_data\x18\x01 \x01(\fR\taudioData\x12#\n" +
+	"\rrequest_trace\x18\x02 \x01(\tR\frequestTrace\"'\n" +
 	"\x11RecognizeAudioRes\x12\x12\n" +
 	"\x04text\x18\x01 \x01(\tR\x04text\"L\n" +
 	"\x11ClearAIContextReq\x12\x12\n" +

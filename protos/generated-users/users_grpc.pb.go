@@ -23,7 +23,6 @@ const (
 	UsersService_GetUser_FullMethodName         = "/users.UsersService/GetUser"
 	UsersService_UpdSystemPrompt_FullMethodName = "/users.UsersService/UpdSystemPrompt"
 	UsersService_UpdLangLevel_FullMethodName    = "/users.UsersService/UpdLangLevel"
-	UsersService_DelUser_FullMethodName         = "/users.UsersService/DelUser"
 )
 
 // UsersServiceClient is the client API for UsersService service.
@@ -34,7 +33,6 @@ type UsersServiceClient interface {
 	GetUser(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetRes, error)
 	UpdSystemPrompt(ctx context.Context, in *UpdSystemPromptReq, opts ...grpc.CallOption) (*UpdSystemPromptRes, error)
 	UpdLangLevel(ctx context.Context, in *UpdLangLevelReq, opts ...grpc.CallOption) (*UpdLangLevelRes, error)
-	DelUser(ctx context.Context, in *DelReq, opts ...grpc.CallOption) (*DelRes, error)
 }
 
 type usersServiceClient struct {
@@ -85,16 +83,6 @@ func (c *usersServiceClient) UpdLangLevel(ctx context.Context, in *UpdLangLevelR
 	return out, nil
 }
 
-func (c *usersServiceClient) DelUser(ctx context.Context, in *DelReq, opts ...grpc.CallOption) (*DelRes, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DelRes)
-	err := c.cc.Invoke(ctx, UsersService_DelUser_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // UsersServiceServer is the server API for UsersService service.
 // All implementations must embed UnimplementedUsersServiceServer
 // for forward compatibility.
@@ -103,7 +91,6 @@ type UsersServiceServer interface {
 	GetUser(context.Context, *GetReq) (*GetRes, error)
 	UpdSystemPrompt(context.Context, *UpdSystemPromptReq) (*UpdSystemPromptRes, error)
 	UpdLangLevel(context.Context, *UpdLangLevelReq) (*UpdLangLevelRes, error)
-	DelUser(context.Context, *DelReq) (*DelRes, error)
 	mustEmbedUnimplementedUsersServiceServer()
 }
 
@@ -125,9 +112,6 @@ func (UnimplementedUsersServiceServer) UpdSystemPrompt(context.Context, *UpdSyst
 }
 func (UnimplementedUsersServiceServer) UpdLangLevel(context.Context, *UpdLangLevelReq) (*UpdLangLevelRes, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdLangLevel not implemented")
-}
-func (UnimplementedUsersServiceServer) DelUser(context.Context, *DelReq) (*DelRes, error) {
-	return nil, status.Error(codes.Unimplemented, "method DelUser not implemented")
 }
 func (UnimplementedUsersServiceServer) mustEmbedUnimplementedUsersServiceServer() {}
 func (UnimplementedUsersServiceServer) testEmbeddedByValue()                      {}
@@ -222,24 +206,6 @@ func _UsersService_UpdLangLevel_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UsersService_DelUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DelReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UsersServiceServer).DelUser(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UsersService_DelUser_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServiceServer).DelUser(ctx, req.(*DelReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // UsersService_ServiceDesc is the grpc.ServiceDesc for UsersService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -262,10 +228,6 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdLangLevel",
 			Handler:    _UsersService_UpdLangLevel_Handler,
-		},
-		{
-			MethodName: "DelUser",
-			Handler:    _UsersService_DelUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
