@@ -22,7 +22,6 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 )
 
@@ -79,11 +78,6 @@ func main() {
 	log, _ := zap.NewDevelopment()
 	defer log.Sync()
 
-	creds, err := credentials.NewServerTLSFromFile("ssl/server.crt", "ssl/server.key")
-	if err != nil {
-		log.Fatal("failed to create credentials", zap.Error(err))
-	}
-
 	lis, err := net.Listen("tcp", ":"+os.Getenv("AISRV_PORT"))
 	if err != nil {
 		log.Fatal("failed to listen", zap.Error(err))
@@ -113,7 +107,7 @@ func main() {
 	adminUUID := int64(utils.GetEnvInt(os.Getenv("ADMIN_UUID"), 0))
 
 	s := aiserver{adminUUID: adminUUID, rdb: rdb, rt: rt, wrks: &wrks, log: log}
-	srv := grpc.NewServer(grpc.Creds(creds))
+	srv := grpc.NewServer()
 	pb.RegisterAIServiceServer(srv, &s)
 
 	log.Debug("AI service successfully started")

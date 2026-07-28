@@ -30,8 +30,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      kafka:
-        condition: service_healthy
 
   learn-service:
     build:
@@ -145,45 +143,6 @@ services:
       timeout: 3s
       retries: 10
       start_period: 5s
-
-  kafka:
-    image: apache/kafka:3.7.0
-    ports:
-      - "${KAFKA_PORT}:${KAFKA_PORT}"
-    logging:
-      driver: "none"
-    healthcheck:
-      test: ["CMD-SHELL", "bash -c 'cat < /dev/null > /dev/tcp/127.0.0.1/${KAFKA_PORT}'"]
-      interval: 3s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_ALLOW_AUTO_CREATE_TOPICS: "true"
-
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-
-      KAFKA_PROCESS_ROLES: "broker,controller"
-      KAFKA_CONTROLLER_QUORUM_VOTERS: "${KAFKA_VOTERS}"
-
-      KAFKA_LISTENERS: "${KAFKA_LIS_1},${KAFKA_LIS_2}"
-      KAFKA_ADVERTISED_LISTENERS: "${KAFKA_ADV}"
-      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
-
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
-
-      KAFKA_CLUSTER_ID: "${KAFKA_CLUSTER_ID}"
-
-  ollama:
-    image: ollama/ollama:latest
-    restart: unless-stopped
-    volumes:
-      - /opt/ollama/models:/root/.ollama/models
-    ports:
-      - "${OLLAMA_PORT_OUT}:${OLLAMA_PORT}"
 
 volumes:
   pgdata:

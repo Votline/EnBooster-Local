@@ -18,7 +18,6 @@ import (
 
 	pb "github.com/Votline/EnBooster/protos/generated-learn"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 
 	"go.uber.org/zap"
 )
@@ -56,11 +55,6 @@ func main() {
 	log, _ := zap.NewDevelopment()
 	defer log.Sync()
 
-	creds, err := credentials.NewServerTLSFromFile("ssl/server.crt", "ssl/server.key")
-	if err != nil {
-		log.Fatal("failed to create credentials", zap.Error(err))
-	}
-
 	lis, err := net.Listen("tcp", ":"+os.Getenv("LEARN_PORT"))
 	if err != nil {
 		log.Fatal("failed to listen", zap.Error(err))
@@ -77,7 +71,7 @@ func main() {
 	}
 
 	s := learnserver{log: log, db: db, rdb: rdb}
-	srv := grpc.NewServer(grpc.Creds(creds))
+	srv := grpc.NewServer()
 	pb.RegisterLearnServiceServer(srv, &s)
 
 	log.Debug("Learn service successfully started")

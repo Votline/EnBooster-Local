@@ -8,10 +8,12 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"gateway/internal/learn"
 	"gateway/internal/statemanager"
+	"gateway/internal/users"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -24,6 +26,7 @@ type WSHandler struct {
 	upgrader *websocket.Upgrader
 	sm       *statemanager.StateManager
 	lrnsrv   *learn.LearnService
+	usrsrv   *users.UsersService
 }
 
 // chatMsg used for send/accept message from frontend
@@ -62,6 +65,11 @@ func NewWSH(log *zap.Logger) (*WSHandler, error) {
 		return nil, fmt.Errorf("%s: create learn-service: %w", op, err)
 	}
 
+	usrsrv, err := users.NewUS(ctxtimeout, stmngr, log)
+	if err != nil {
+		return nil, fmt.Errorf("%s: create users-service: %w", op, err)
+	}
+
 	return &WSHandler{
 		log: log,
 		upgrader: &websocket.Upgrader{
@@ -71,6 +79,7 @@ func NewWSH(log *zap.Logger) (*WSHandler, error) {
 		},
 		sm:     stmngr,
 		lrnsrv: lrnsrv,
+		usrsrv: usrsrv,
 	}, nil
 }
 
@@ -127,13 +136,57 @@ func (h *WSHandler) HandleChatWS(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *WSHandler) handleMessage(src string, buf *string) {
+// tasksPool used for getting tasks
+var tasksPool = sync.Pool{
+	New: func() any {
+		buf := make([]learn.Task, 0, 1)
+		return &buf
+	},
+}
+
+// handleMessage handles incoming messages
+// and call needed services
+func (h *WSHandler) handleMessage(src string, buf *string) error {
 	const op = "delivery.handleUser"
 
+	reqTrace := uuid.NewString()
 	msg := strings.ToLower(src)
+
+	h.log.Info("New request",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace),
+		zap.Int("msg_len", len(msg)))
 
 	switch msg {
 	case "start":
 		*buf = "Hello"
+	case "learning":
+		ud, err := h.usrsrv.GetData(reqTrace)
+		if err != nil {
+			return fmt.Errorf("%s: get user data: %w", op, err)
+		}
+
+		h.log.Info("Get user data",
+			zap.String("op", op),
+			zap.String("reqTrace", reqTrace))
+
+		taskBuf := tasksPool.Get().(*[]learn.Task)
+		defer tasksPool.Put(taskBuf)
+
+		if err := h.lrnsrv.GetTasks(ud.Level, ud.TaskID, 1, taskBuf, reqTrace); err != nil {
+			return fmt.Errorf("%s: get tasks: %w", op, err)
+		}
+
+		*buf = (*taskBuf)[0].TaskData
+		if len(*taskBuf) == 0 {
+			*buf = "No tasks found"
+		}
+
+		h.log.Info("Get task",
+			zap.String("op", op),
+			zap.String("reqTrace", reqTrace),
+			zap.Int("task_len", len(*buf)))
 	}
+
+	return nil
 }

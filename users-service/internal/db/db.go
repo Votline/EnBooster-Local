@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -61,11 +62,19 @@ func NewDB(log *zap.Logger) (*DB, error) {
 
 	log.Debug("DB users succesfully connected")
 
-	return &DB{
+	instance := &DB{
 		db:  db,
 		log: log,
 		bd:  sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
-	}, nil
+	}
+
+	if err := instance.RegUser(1, context.Background(), ""); err != nil {
+		if !strings.Contains(err.Error(), "duplicate") {
+			return nil, fmt.Errorf("%s: create user: %w", op, err)
+		}
+	}
+
+	return instance, nil
 }
 
 func (d *DB) Close() error {
@@ -73,12 +82,12 @@ func (d *DB) Close() error {
 }
 
 // RegUser add user to database.
-func (d *DB) RegUser(uuid, chatID int64, ctx context.Context, reqTrace string) error {
+func (d *DB) RegUser(uuid int64, ctx context.Context, reqTrace string) error {
 	const op = "db.RegUser"
 
 	query, args, err := d.bd.Insert("users").
-		Columns("uuid", "chat_id").
-		Values(uuid, chatID).
+		Columns("uuid").
+		Values(uuid).
 		ToSql()
 	if err != nil {
 		return fmt.Errorf("%s: build insert query: %w", op, err)
@@ -271,34 +280,6 @@ func (d *DB) UpdateLangLevel(ctx context.Context, uuid int64, level string, reqT
 	}
 
 	d.log.Debug("LangLevel succesfully updated",
-		zap.Int64("uuid", uuid),
-		zap.String("request_trace", reqTrace),
-		zap.String("op", op))
-
-	return nil
-}
-
-// DelUser delete user from database
-func (d *DB) DelUser(uuid int64, ctx context.Context, reqTrace string) error {
-	const op = "db.DelUser"
-
-	query, args, err := d.bd.Delete("users").
-		Where(sq.Eq{"uuid": uuid}).
-		ToSql()
-	if err != nil {
-		return fmt.Errorf("%s: build delete query: %w", op, err)
-	}
-
-	d.log.Debug("DelUser query",
-		zap.String("query", query),
-		zap.String("request_trace", reqTrace),
-		zap.String("op", op))
-
-	if _, err := d.db.ExecContext(ctx, query, args...); err != nil {
-		return fmt.Errorf("%s: delete user: %w", op, err)
-	}
-
-	d.log.Debug("User succesfully deleted",
 		zap.Int64("uuid", uuid),
 		zap.String("request_trace", reqTrace),
 		zap.String("op", op))

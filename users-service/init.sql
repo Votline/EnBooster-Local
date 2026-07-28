@@ -1,6 +1,5 @@
 CREATE TABLE IF NOT EXISTS users (
-	uuid BIGINT PRIMARY KEY,
-	chat_id BIGINT NOT NULL,
+  uuid BIGINT PRIMARY KEY,
 	id SERIAL UNIQUE,
 	best_theme TEXT NOT NULL DEFAULT '',
 	best_theme_counter INT NOT NULL DEFAULT 0,
