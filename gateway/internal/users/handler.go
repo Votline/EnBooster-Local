@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unsafe"
 
-	"gateway/internal/statemanager"
+	stm "gateway/internal/statemanager"
 
 	pb "github.com/Votline/EnBooster-Local/protos/generated-users"
 	"go.uber.org/zap"
@@ -97,6 +97,7 @@ func (us *UsersService) UpdSystemPrompt(uuid int64, sp, reqTrace string) error {
 	return nil
 }
 
+// UpdLangLevel updates the language level of the user
 func (us *UsersService) UpdLangLevel(uuid int64, level string, reqTrace string) error {
 	const op = "users.UpdLangLevel"
 
@@ -129,13 +130,52 @@ func (us *UsersService) UpdLangLevel(uuid int64, level string, reqTrace string) 
 	return nil
 }
 
+// UpdateUserTaskCtx get user context, update it previous counter
+// and set new state
+func (us *UsersService) UpdateUserTaskCtx(uctx stm.UserContext, theme, answer, reqTrace string, add int) error {
+	const op = "users.UpdateUserTaskCtx"
+
+	us.log.Debug("Update user task ctx request",
+		zap.String("reqTrace", reqTrace),
+		zap.String("op", op))
+
+	var taskSes stm.TaskSession
+	uctxData := unsafe.Slice(unsafe.StringData(uctx.JSONData), len(uctx.JSONData))
+	if uctx.JSONData != "" {
+		if err := json.Unmarshal(uctxData, &taskSes); err != nil {
+			return fmt.Errorf("%s: unmarshal: %w", op, err)
+		}
+	}
+
+	curSes := stm.TaskSession{
+		CurrentTheme: theme,
+		Counter:      taskSes.Counter + add,
+		Answer:       answer,
+	}
+
+	jsonData, err := json.Marshal(curSes)
+	if err != nil {
+		return fmt.Errorf("%s: marshal json: %w", op, err)
+	}
+
+	if err := us.sm.UpdateUserDataCtx(jsonData); err != nil {
+		return fmt.Errorf("%s: update data: %w", op, err)
+	}
+
+	us.log.Debug("Update user task ctx successfully",
+		zap.String("reqTrace", reqTrace),
+		zap.String("op", op))
+
+	return nil
+}
+
 // UpdateUserShiritoriCtx updates user shiritori context
 // append new word to the used words
 // check if the word is repeated - return true if it is
 func (us *UsersService) UpdateUserShiritoriCtx(
-	shiritoriSes *statemanager.ShiritoriSession, uuid int64,
+	shiritoriSes *stm.ShiritoriSession, uuid int64,
 	userWord, userLastLetter, botWord, botLastLetter string,
-	offsetID int, state int8, sm *statemanager.StateManager,
+	offsetID int, state int8, sm *stm.StateManager,
 ) (isRepeat bool, notMatch bool, err error) {
 	const op = "users.UpdateUserShiritoriCtx"
 
@@ -176,7 +216,7 @@ func (us *UsersService) UpdateUserShiritoriCtx(
 		return isRepeat, notMatch, fmt.Errorf("%s: marshal json: %w", op, err)
 	}
 
-	if err := sm.SetUserCtx(uuid, state, jsonData); err != nil {
+	if err := sm.SetUserCtx(state, jsonData); err != nil {
 		return isRepeat, notMatch, fmt.Errorf("%s: set user state: %w", op, err)
 	}
 

@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"gateway/internal/learn"
-	"gateway/internal/statemanager"
+	stm "gateway/internal/statemanager"
 	"gateway/internal/users"
 
 	"github.com/google/uuid"
@@ -24,7 +24,7 @@ import (
 type WSHandler struct {
 	log      *zap.Logger
 	upgrader *websocket.Upgrader
-	sm       *statemanager.StateManager
+	sm       *stm.StateManager
 	lrnsrv   *learn.LearnService
 	usrsrv   *users.UsersService
 }
@@ -55,9 +55,9 @@ func NewWSH(log *zap.Logger) (*WSHandler, error) {
 	statettl := time.Duration(GetEnvInt("STATE_TTL", 30)) * time.Minute
 	pingtimeout := time.Duration(GetEnvInt("PING_TIMEOUT", 10)) * time.Second
 
-	stmngr, err := statemanager.NewSM(ctxtimeout, statettl, pingtimeout)
+	stmngr, err := stm.NewSM(ctxtimeout, statettl, pingtimeout)
 	if err != nil {
-		return nil, fmt.Errorf("%s: create statemanager: %w", op, err)
+		return nil, fmt.Errorf("%s: create stm: %w", op, err)
 	}
 
 	usrsrv, err := users.NewUS(ctxtimeout, stmngr, log)
@@ -123,7 +123,9 @@ func (h *WSHandler) HandleChatWS(w http.ResponseWriter, r *http.Request) {
 			zap.String("op", op))
 
 		answer = ""
-		h.handleMessage(msg.Text, &answer)
+		if err := h.handleMessage(msg.Text, &answer); err != nil {
+			answer = "Something went wrong. Try again later"
+		}
 
 		reply := chatMsg{
 			UUID: uuid.NewString(),
@@ -153,6 +155,11 @@ var tasksPool = sync.Pool{
 func (h *WSHandler) handleMessage(src string, buf *string) error {
 	const op = "delivery.handleUser"
 
+	uctx, err := h.sm.GetUserCtx()
+	if err != nil {
+		return fmt.Errorf("%s: get user state: %w", op, err)
+	}
+
 	reqTrace := uuid.NewString()
 	msg := strings.ToLower(src)
 
@@ -165,34 +172,98 @@ func (h *WSHandler) handleMessage(src string, buf *string) error {
 	case "start":
 		*buf = "Hello"
 	case "learning":
-		ud, err := h.usrsrv.GetData(reqTrace)
-		if err != nil {
-			return fmt.Errorf("%s: get user data: %w", op, err)
+		if err := h.learningTask(buf, uctx, reqTrace); err != nil {
+			return fmt.Errorf("%s: unexpected error: %w", op, err)
 		}
-
-		h.log.Info("Successfully get user data",
-			zap.String("op", op),
-			zap.String("reqTrace", reqTrace))
-
-		taskBuf := tasksPool.Get().(*[]learn.Task)
-		defer tasksPool.Put(taskBuf)
-
-		if err := h.lrnsrv.GetTasks(ud.Level, ud.TaskID, 1, taskBuf, reqTrace); err != nil {
-			return fmt.Errorf("%s: get tasks: %w", op, err)
+	default:
+		if err := h.handleDefault(buf, uctx, src, reqTrace); err != nil {
+			return fmt.Errorf("%s: unexpected error: %w", op, err)
 		}
-
-		*buf = "No tasks found"
-		if len(*taskBuf) != 0 {
-			*buf = (*taskBuf)[0].TaskData
-		}
-
-		h.log.Info("Get task",
-			zap.String("op", op),
-			zap.String("reqTrace", reqTrace),
-			zap.Int("task_len", len(*buf)))
 	}
 
 	h.log.Info("Request successfully processed",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace))
+
+	return nil
+}
+
+// handleDefault processed default content (messages and state)
+// via call handleAdmin and handleUser methods
+func (h *WSHandler) handleDefault(buf *string, uctx stm.UserContext, msg, reqTrace string) error {
+	const op = "delivery.handleDefault"
+
+	h.log.Info("handle default content",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace))
+
+	if err := h.handleAdmin(buf, uctx, msg, reqTrace); err != nil {
+		return fmt.Errorf("%s: unexpected error: %w", op, err)
+	}
+	if *buf == "no handled" {
+		if err := h.handleUser(buf, uctx, msg, reqTrace); err != nil {
+			return fmt.Errorf("%s: unexpected error: %w", op, err)
+		}
+	}
+	if *buf == "no handled" {
+		*buf = "Unknown command and state"
+	}
+
+	h.log.Info("Successfully handled message",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace))
+
+	return nil
+}
+
+// learningTask get task for current user language level
+// and updates content in user context
+func (h *WSHandler) learningTask(buf *string, uctx stm.UserContext, reqTrace string) error {
+	const op = "delivery.learningTask"
+
+	h.log.Info("handle learning task",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace))
+
+	ud, err := h.usrsrv.GetData(reqTrace)
+	if err != nil {
+		return fmt.Errorf("%s: get user data: %w", op, err)
+	}
+
+	h.log.Info("Successfully get user data",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace))
+
+	taskBuf := tasksPool.Get().(*[]learn.Task)
+	defer tasksPool.Put(taskBuf)
+
+	if err := h.lrnsrv.GetTasks(ud.Level, ud.TaskID, 1, taskBuf, reqTrace); err != nil {
+		return fmt.Errorf("%s: get tasks: %w", op, err)
+	}
+
+	h.log.Info("Get task",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace),
+		zap.Int("task_len", len(*buf)))
+
+	if len(*taskBuf) == 0 {
+		*buf = "No tasks found"
+		return nil
+	}
+
+	*buf = (*taskBuf)[0].TaskData
+	theme := (*taskBuf)[0].Theme
+	answer := (*taskBuf)[0].Answer
+
+	if err := h.usrsrv.UpdateUserTaskCtx(uctx, theme, answer, reqTrace, 0); err != nil {
+		return fmt.Errorf("%s: update user task ctx: %w", op, err)
+	}
+
+	if err := h.sm.UpdUserStateCtx(stm.StateTaskLearning); err != nil {
+		return fmt.Errorf("%s: update state: %w", op, err)
+	}
+
+	h.log.Info("Successfully handled message",
 		zap.String("op", op),
 		zap.String("reqTrace", reqTrace))
 

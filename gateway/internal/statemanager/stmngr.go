@@ -16,9 +16,9 @@ import (
 // States are the possible states of the user
 const (
 	StateNone = iota
-	StateTaskAdding
+	StateTasksAdding
 	StateTaskDeleting
-	StateWordAdding
+	StateWordsAdding
 	StateWordDeleting
 	StateTaskLearning
 	StateAdminNotCommand
@@ -99,8 +99,10 @@ func (sm *StateManager) Close() error {
 }
 
 // GetUserCtx returns the user context of the user from redis
-func (sm *StateManager) GetUserCtx(uuid int64) (UserContext, error) {
+func (sm *StateManager) GetUserCtx() (UserContext, error) {
 	const op = "statemanager.GetState"
+
+	var uuid int64 = 1
 
 	ctx, cancel := context.WithTimeout(context.Background(), sm.ctxTimeout)
 	defer cancel()
@@ -128,8 +130,10 @@ func (sm *StateManager) GetUserCtx(uuid int64) (UserContext, error) {
 }
 
 // SetUserCtx sets the state and data of the user in redis
-func (sm *StateManager) SetUserCtx(uuid int64, state int8, jsonData []byte) error {
+func (sm *StateManager) SetUserCtx(state int8, jsonData []byte) error {
 	const op = "statemanager.SetState"
+
+	var uuid int64 = 1
 
 	jsonStr := unsafe.String(unsafe.SliceData(jsonData), len(jsonData))
 
@@ -165,8 +169,10 @@ else
 end
 `)
 
-func (sm *StateManager) UpdUserStateCtx(uuid int64, state int8) error {
+func (sm *StateManager) UpdUserStateCtx(state int8) error {
 	const op = "statemanager.UpdUserStateCtx"
+
+	var uuid int64 = 1
 
 	ctx, cancel := context.WithTimeout(context.Background(), sm.ctxTimeout)
 	defer cancel()
@@ -200,8 +206,10 @@ end
 `)
 
 // UpdateUserDataCtx updates the user data in redis
-func (sm *StateManager) UpdateUserDataCtx(uuid int64, jsonData []byte) error {
+func (sm *StateManager) UpdateUserDataCtx(jsonData []byte) error {
 	const op = "statemanager.UpdateUserDataCtx"
+
+	var uuid int64 = 1
 
 	ctx, cancel := context.WithTimeout(context.Background(), sm.ctxTimeout)
 	defer cancel()
