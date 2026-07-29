@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"gateway/internal/ai"
 	"gateway/internal/learn"
 	stm "gateway/internal/statemanager"
 	"gateway/internal/users"
@@ -23,17 +24,26 @@ import (
 // WSHandler main struct for BFF connection
 type WSHandler struct {
 	log      *zap.Logger
+	conn     *websocket.Conn
 	upgrader *websocket.Upgrader
 	sm       *stm.StateManager
 	lrnsrv   *learn.LearnService
 	usrsrv   *users.UsersService
+	aisrv    *ai.AIService
 }
 
 // chatMsg used for send/accept message from frontend
 type chatMsg struct {
-	UUID string `json:"uuid"`
-	Text string `json:"text"`
-	IsMe bool   `json:"is_me"`
+	Text     string `json:"text"`
+	ReqTrace string `json:"req_trace"`
+}
+
+// tasksPool used for getting tasks
+var tasksPool = sync.Pool{
+	New: func() any {
+		buf := make([]learn.Task, 0, 1)
+		return &buf
+	},
 }
 
 func GetEnvInt(key string, defaultVal int) int {
@@ -72,6 +82,11 @@ func NewWSH(log *zap.Logger) (*WSHandler, error) {
 		return nil, fmt.Errorf("%s: create learn-service: %w", op, err)
 	}
 
+	aisrv, err := ai.NewAIS(ctxtimeout, stmngr, log)
+	if err != nil {
+		return nil, fmt.Errorf("%s: create ai-service: %w", op, err)
+	}
+
 	log.Info("Connected to learn-service", zap.String("op", op))
 
 	return &WSHandler{
@@ -84,6 +99,7 @@ func NewWSH(log *zap.Logger) (*WSHandler, error) {
 		sm:     stmngr,
 		lrnsrv: lrnsrv,
 		usrsrv: usrsrv,
+		aisrv:  aisrv,
 	}, nil
 }
 
@@ -105,6 +121,7 @@ func (h *WSHandler) HandleChatWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer conn.Close()
+	h.conn = conn
 
 	h.log.Info("Frontend successfully connceted", zap.String("op", op))
 
@@ -123,14 +140,18 @@ func (h *WSHandler) HandleChatWS(w http.ResponseWriter, r *http.Request) {
 			zap.String("op", op))
 
 		answer = ""
-		if err := h.handleMessage(msg.Text, &answer); err != nil {
+		reqTrace := uuid.NewString()
+		if err := h.handleMessage(reqTrace, msg.Text, &answer); err != nil {
 			answer = "Something went wrong. Try again later"
+			h.log.Error("handleMessage failed",
+				zap.String("op", op),
+				zap.String("reqTrace", reqTrace),
+				zap.Error(err))
 		}
 
 		reply := chatMsg{
-			UUID: uuid.NewString(),
-			Text: "Bot accepted: " + answer,
-			IsMe: false,
+			Text:     answer,
+			ReqTrace: reqTrace,
 		}
 
 		if err := conn.WriteJSON(reply); err != nil {
@@ -142,17 +163,9 @@ func (h *WSHandler) HandleChatWS(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// tasksPool used for getting tasks
-var tasksPool = sync.Pool{
-	New: func() any {
-		buf := make([]learn.Task, 0, 1)
-		return &buf
-	},
-}
-
 // handleMessage handles incoming messages
 // and call needed services
-func (h *WSHandler) handleMessage(src string, buf *string) error {
+func (h *WSHandler) handleMessage(reqTrace, src string, buf *string) error {
 	const op = "delivery.handleUser"
 
 	uctx, err := h.sm.GetUserCtx()
@@ -160,7 +173,6 @@ func (h *WSHandler) handleMessage(src string, buf *string) error {
 		return fmt.Errorf("%s: get user state: %w", op, err)
 	}
 
-	reqTrace := uuid.NewString()
 	msg := strings.ToLower(src)
 
 	h.log.Info("New request",
@@ -177,6 +189,10 @@ func (h *WSHandler) handleMessage(src string, buf *string) error {
 		}
 	case "shiritori":
 		if err := h.shiritori(buf, reqTrace); err != nil {
+			return fmt.Errorf("%s: unexpected error: %w", op, err)
+		}
+	case "chatting":
+		if err := h.chatting(buf, reqTrace); err != nil {
 			return fmt.Errorf("%s: unexpected error: %w", op, err)
 		}
 	default:
@@ -279,14 +295,39 @@ func (h *WSHandler) learningTask(buf *string, uctx stm.UserContext, reqTrace str
 func (h *WSHandler) shiritori(buf *string, reqTrace string) error {
 	const op = "delivery.shiritori"
 
-	h.log.Info("handle learning task",
+	h.log.Info("handle shiritori",
 		zap.String("op", op),
 		zap.String("reqTrace", reqTrace))
 
 	if err := h.sm.UpdUserStateCtx(stm.StateShiritori); err != nil {
 		return fmt.Errorf("%s: change state: %w", op, err)
 	}
-	*buf = "Shiritori mode activated. Write any word."
+	*buf = "Shiritori mode activated. Write any word"
+
+	h.log.Info("Successfully handled message",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace))
+
+	return nil
+}
+
+// chatting changes user state to 'StateAiSetting'
+// and rewrite buffer
+func (h *WSHandler) chatting(buf *string, reqTrace string) error {
+	const op = "delivery.Chatting"
+
+	h.log.Info("handle chatting",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace))
+
+	if err := h.sm.UpdUserStateCtx(stm.StateAiSetting); err != nil {
+		return fmt.Errorf("%s: change state: %w", op, err)
+	}
+	*buf = "Choose your way to use AI:\n" +
+		"ttt: text to text\n" +
+		"tts: text to speech\n" +
+		"stt: speech to text\n" +
+		"sts: speech to speech\n"
 
 	h.log.Info("Successfully handled message",
 		zap.String("op", op),

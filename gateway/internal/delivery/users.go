@@ -2,6 +2,7 @@
 package delivery
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -28,14 +29,26 @@ var wordsPool = sync.Pool{
 	},
 }
 
+var aiTextPool = sync.Pool{
+	New: func() any {
+		return bytes.NewBuffer(make([]byte, 0, 512))
+	},
+}
+
 func (h *WSHandler) handleUser(buf *string, uctx stm.UserContext, src, reqTrace string) error {
 	const op = "delivery.handleUser"
 
-	h.log.Info("handle admin content",
+	h.log.Info("handle user content",
 		zap.String("op", op),
 		zap.String("reqTrace", reqTrace))
 
 	msg := strings.ToLower(src)
+	if msg == "stop" && uctx.State != stm.StateShiritori {
+		if err := h.sm.UpdUserStateCtx(stm.StateNone); err != nil {
+			return fmt.Errorf("%s: update state: %w", op, err)
+		}
+		*buf = "Successfully stopped"
+	}
 
 	switch uctx.State {
 	case stm.StateTaskLearning:
@@ -183,6 +196,50 @@ func (h *WSHandler) handleUser(buf *string, uctx stm.UserContext, src, reqTrace 
 		}
 
 		*buf = "Word: " + botWord
+	case stm.StateAiSetting:
+		var newState int8 = stm.StateNone
+		switch msg {
+		case "ttt":
+			newState = stm.StateTTT
+		case "tts":
+			newState = stm.StateTTS
+		case "stt":
+			newState = stm.StateSTT
+		case "sts":
+			newState = stm.StateSTS
+		default:
+			*buf = "Invalid choose: " + msg
+			return nil
+		}
+		if err := h.sm.UpdUserStateCtx(newState); err != nil {
+			return fmt.Errorf("%s: update state: %w", op, err)
+		}
+		*buf = "AI settings updated"
+	case stm.StateTTT:
+		h.log.Info("got")
+
+		h.conn.WriteJSON(chatMsg{
+			Text:     "AI is generating text...",
+			ReqTrace: reqTrace,
+		})
+
+		resBuf := aiTextPool.Get().(*bytes.Buffer)
+		resBuf.Reset()
+		defer aiTextPool.Put(resBuf)
+
+		if err := h.generateText(uctx, src, reqTrace, func(text string) {
+			resBuf.WriteString(text)
+			h.conn.WriteJSON(chatMsg{
+				Text:     resBuf.String(),
+				ReqTrace: reqTrace,
+			})
+		}); err != nil {
+			return fmt.Errorf("%s: generate text: %w", op, err)
+		}
+
+		*buf = resBuf.String()
+	default:
+		*buf = "no handled"
 	}
 
 	h.log.Info("Successfully handled message",
@@ -198,6 +255,44 @@ func (h *WSHandler) saveState(shirSes stm.ShiritoriSession) error {
 	const op = "delivery.saveState"
 
 	jsonData, err := json.Marshal(shirSes)
+	if err != nil {
+		return fmt.Errorf("%s: marshal json: %w", op, err)
+	}
+
+	if err := h.sm.UpdateUserDataCtx(jsonData); err != nil {
+		return fmt.Errorf("%s: update user data: %w", op, err)
+	}
+
+	return nil
+}
+
+// generateText generates a text message from the given user message and
+// yields the result to the given callback function.
+func (h *WSHandler) generateText(uctx stm.UserContext, src, reqTrace string, yield func(text string)) error {
+	const op = "delivery.generateText"
+
+	var chatSes stm.ChattingSession
+	if len(uctx.JSONData) > 0 {
+		uctxData := unsafe.Slice(unsafe.StringData(uctx.JSONData), len(uctx.JSONData))
+		if err := json.Unmarshal(uctxData, &chatSes); err != nil {
+			return fmt.Errorf("%s: unmarshal: %w", op, err)
+		}
+	}
+	sysPrompt := chatSes.SystemPrompt
+
+	var builder strings.Builder
+	if err := h.aisrv.GenerateText(src, sysPrompt, reqTrace, func(res []byte) {
+		resStr := unsafe.String(unsafe.SliceData(res), len(res))
+		builder.WriteString(resStr)
+		yield(resStr)
+		h.log.Debug("Save bot msg", zap.String("str", resStr))
+	}); err != nil {
+		return fmt.Errorf("%s: generate text: %w", op, err)
+	}
+
+	chatSes.LastMessage = builder.String()
+
+	jsonData, err := json.Marshal(chatSes)
 	if err != nil {
 		return fmt.Errorf("%s: marshal json: %w", op, err)
 	}

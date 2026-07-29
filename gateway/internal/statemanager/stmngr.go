@@ -28,7 +28,7 @@ const (
 	StateTTS
 	StateSTT
 	StateTTT
-	StateSTTandTTS
+	StateSTS
 	StateTranscriptVoice
 	StateAiSetting
 )
