@@ -175,6 +175,10 @@ func (h *WSHandler) handleMessage(src string, buf *string) error {
 		if err := h.learningTask(buf, uctx, reqTrace); err != nil {
 			return fmt.Errorf("%s: unexpected error: %w", op, err)
 		}
+	case "shiritori":
+		if err := h.shiritori(buf, reqTrace); err != nil {
+			return fmt.Errorf("%s: unexpected error: %w", op, err)
+		}
 	default:
 		if err := h.handleDefault(buf, uctx, src, reqTrace); err != nil {
 			return fmt.Errorf("%s: unexpected error: %w", op, err)
@@ -206,7 +210,7 @@ func (h *WSHandler) handleDefault(buf *string, uctx stm.UserContext, msg, reqTra
 		}
 	}
 	if *buf == "no handled" {
-		*buf = "Unknown command and state"
+		*buf = "Unknown command or state"
 	}
 
 	h.log.Info("Successfully handled message",
@@ -262,6 +266,27 @@ func (h *WSHandler) learningTask(buf *string, uctx stm.UserContext, reqTrace str
 	if err := h.sm.UpdUserStateCtx(stm.StateTaskLearning); err != nil {
 		return fmt.Errorf("%s: update state: %w", op, err)
 	}
+
+	h.log.Info("Successfully handled message",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace))
+
+	return nil
+}
+
+// shiritori changes user state to 'StateShiritori'
+// and rewrite buffer
+func (h *WSHandler) shiritori(buf *string, reqTrace string) error {
+	const op = "delivery.shiritori"
+
+	h.log.Info("handle learning task",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace))
+
+	if err := h.sm.UpdUserStateCtx(stm.StateShiritori); err != nil {
+		return fmt.Errorf("%s: change state: %w", op, err)
+	}
+	*buf = "Shiritori mode activated. Write any word."
 
 	h.log.Info("Successfully handled message",
 		zap.String("op", op),

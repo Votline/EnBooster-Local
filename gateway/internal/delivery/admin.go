@@ -3,6 +3,7 @@ package delivery
 
 import (
 	"fmt"
+	"strings"
 
 	stm "gateway/internal/statemanager"
 
@@ -23,7 +24,7 @@ const helpMsg = `
 
 // handleAdmin check message for admin commands or states
 // set 'buf' value to 'no handled' on default case
-func (h *WSHandler) handleAdmin(buf *string, uctx stm.UserContext, msg, reqTrace string) error {
+func (h *WSHandler) handleAdmin(buf *string, uctx stm.UserContext, src, reqTrace string) error {
 	const op = "delivery.handleAdmin"
 
 	h.log.Info("handle admin content",
@@ -32,6 +33,7 @@ func (h *WSHandler) handleAdmin(buf *string, uctx stm.UserContext, msg, reqTrace
 
 	*buf = ""
 	stateNone := false
+	msg := strings.ToLower(src)
 	switch msg {
 	case "tasks_add":
 		if err := h.sm.UpdUserStateCtx(stm.StateTasksAdding); err != nil {
@@ -55,27 +57,27 @@ func (h *WSHandler) handleAdmin(buf *string, uctx stm.UserContext, msg, reqTrace
 		switch uctx.State {
 		case stm.StateTasksAdding:
 			stateNone = true
-			inserted, err := h.lrnsrv.NewTasks(msg, reqTrace)
+			inserted, err := h.lrnsrv.NewTasks(src, reqTrace)
 			if err != nil {
 				return fmt.Errorf("%s: new tasks: %w", op, err)
 			}
 			*buf = fmt.Sprintf("Successfully added %d tasks", inserted)
 		case stm.StateWordsAdding:
 			stateNone = true
-			inserted, err := h.lrnsrv.NewWords(msg, reqTrace)
+			inserted, err := h.lrnsrv.NewWords(src, reqTrace)
 			if err != nil {
 				return fmt.Errorf("%s new words: %w", op, err)
 			}
 			*buf = fmt.Sprintf("Successfully added %d words", inserted)
 		case stm.StateTaskDeleting:
 			stateNone = true
-			if err := h.lrnsrv.DelTask(msg, reqTrace); err != nil {
+			if err := h.lrnsrv.DelTask(src, reqTrace); err != nil {
 				return fmt.Errorf("%s: delete task: %w", op, err)
 			}
 			*buf = "Successfully deleted task"
 		case stm.StateWordDeleting:
 			stateNone = true
-			if err := h.lrnsrv.DelWord(msg, reqTrace); err != nil {
+			if err := h.lrnsrv.DelWord(src, reqTrace); err != nil {
 				return fmt.Errorf("%s: delete word: %w", op, err)
 			}
 			*buf = "Successfully deleted word"

@@ -173,15 +173,14 @@ func (us *UsersService) UpdateUserTaskCtx(uctx stm.UserContext, theme, answer, r
 // append new word to the used words
 // check if the word is repeated - return true if it is
 func (us *UsersService) UpdateUserShiritoriCtx(
-	shiritoriSes *stm.ShiritoriSession, uuid int64,
+	shiritoriSes *stm.ShiritoriSession,
 	userWord, userLastLetter, botWord, botLastLetter string,
-	offsetID int, state int8, sm *stm.StateManager,
+	offsetID int, state int8,
 ) (isRepeat bool, notMatch bool, err error) {
 	const op = "users.UpdateUserShiritoriCtx"
 
 	us.log.Debug("Is word repeated request",
 		zap.String("op", op),
-		zap.Int64("uuid", uuid),
 		zap.String("user_word", userWord))
 
 	if shiritoriSes.UsedWords == nil {
@@ -216,7 +215,7 @@ func (us *UsersService) UpdateUserShiritoriCtx(
 		return isRepeat, notMatch, fmt.Errorf("%s: marshal json: %w", op, err)
 	}
 
-	if err := sm.SetUserCtx(state, jsonData); err != nil {
+	if err := us.sm.SetUserCtx(state, jsonData); err != nil {
 		return isRepeat, notMatch, fmt.Errorf("%s: set user state: %w", op, err)
 	}
 
