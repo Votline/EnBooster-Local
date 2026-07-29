@@ -3,7 +3,7 @@ module gateway
 go 1.26.3
 
 require (
-	github.com/Votline/EnBooster-Local/protos v0.0.2
+	github.com/Votline/EnBooster-Local/protos v0.0.3
 	github.com/Votline/EnBooster/protos v1.2.6
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/google/uuid v1.6.0

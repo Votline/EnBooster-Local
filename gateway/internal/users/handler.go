@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"time"
 	"unsafe"
 
 	"gateway/internal/statemanager"
@@ -46,7 +45,7 @@ func (us *UsersService) GetData(reqTrace string) (UserData, error) {
 		zap.String("op", op),
 		zap.String("reqTrace", reqTrace))
 
-	ctx, cancel := context.WithTimeout(context.Background(), us.ctxTimeout*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), us.ctxTimeout)
 	defer cancel()
 
 	res, err := us.client.GetUser(ctx, &pb.GetReq{
@@ -80,7 +79,7 @@ func (us *UsersService) UpdSystemPrompt(uuid int64, sp, reqTrace string) error {
 		zap.Int("system_prompt_len", len(sp)),
 		zap.String("reqTrace", reqTrace))
 
-	ctx, cancel := context.WithTimeout(context.Background(), us.ctxTimeout*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), us.ctxTimeout)
 	defer cancel()
 
 	if _, err := us.client.UpdSystemPrompt(ctx, &pb.UpdSystemPromptReq{
@@ -111,7 +110,7 @@ func (us *UsersService) UpdLangLevel(uuid int64, level string, reqTrace string) 
 		return fmt.Errorf("%s: invalid language level: %s", op, level)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), us.ctxTimeout*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), us.ctxTimeout)
 	defer cancel()
 
 	if _, err := us.client.UpdLangLevel(ctx, &pb.UpdLangLevelReq{

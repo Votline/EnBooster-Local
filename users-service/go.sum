@@ -4,6 +4,8 @@ github.com/Masterminds/squirrel v1.5.4 h1:uUcX/aBc8O7Fg9kaISIUsHXdKuqehiXAMQTYX8
 github.com/Masterminds/squirrel v1.5.4/go.mod h1:NNaOrjSoIDfDA40n7sr2tPNZRfjzjA400rg+riTZj10=
 github.com/Votline/EnBooster-Local/protos v0.0.2 h1:cav0UYpKPKtI0G/ZLpRZstCKJDNEDI8un5MDW/g7sQk=
 github.com/Votline/EnBooster-Local/protos v0.0.2/go.mod h1:Tok4QByeEzwhW6tQYsMSGiv3gn3f8Q8fxzElcZ2hh84=
+github.com/Votline/EnBooster-Local/protos v0.0.3 h1:3dMMG80MfiV5zP0sSJeWoNDQwWYqguPCLDXNoPVtl2Q=
+github.com/Votline/EnBooster-Local/protos v0.0.3/go.mod h1:Tok4QByeEzwhW6tQYsMSGiv3gn3f8Q8fxzElcZ2hh84=
 github.com/Votline/EnBooster/protos v0.0.2 h1:wF2nhBEaBS7XbNSM3dla2jqVojxivAQANrnfdVJ81gc=
 github.com/Votline/EnBooster/protos v0.0.2/go.mod h1:SEdrv6X/Gj/3ghZkiCxRAvIwR0diDo3rj5c4Dd1JX4I=
 github.com/Votline/EnBooster/protos v0.0.8 h1:GDwxFu4ajY/iLLcPqcGwbb8tcDO7zpPPYF5jrGgBmCw=

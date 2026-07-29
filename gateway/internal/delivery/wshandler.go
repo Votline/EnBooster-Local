@@ -60,15 +60,19 @@ func NewWSH(log *zap.Logger) (*WSHandler, error) {
 		return nil, fmt.Errorf("%s: create statemanager: %w", op, err)
 	}
 
+	usrsrv, err := users.NewUS(ctxtimeout, stmngr, log)
+	if err != nil {
+		return nil, fmt.Errorf("%s: create users-service: %w", op, err)
+	}
+
+	log.Info("Connected to users-service", zap.String("op", op))
+
 	lrnsrv, err := learn.NewLS(stmngr, ctxtimeout, log)
 	if err != nil {
 		return nil, fmt.Errorf("%s: create learn-service: %w", op, err)
 	}
 
-	usrsrv, err := users.NewUS(ctxtimeout, stmngr, log)
-	if err != nil {
-		return nil, fmt.Errorf("%s: create users-service: %w", op, err)
-	}
+	log.Info("Connected to learn-service", zap.String("op", op))
 
 	return &WSHandler{
 		log: log,
@@ -166,7 +170,7 @@ func (h *WSHandler) handleMessage(src string, buf *string) error {
 			return fmt.Errorf("%s: get user data: %w", op, err)
 		}
 
-		h.log.Info("Get user data",
+		h.log.Info("Successfully get user data",
 			zap.String("op", op),
 			zap.String("reqTrace", reqTrace))
 
@@ -177,9 +181,9 @@ func (h *WSHandler) handleMessage(src string, buf *string) error {
 			return fmt.Errorf("%s: get tasks: %w", op, err)
 		}
 
-		*buf = (*taskBuf)[0].TaskData
-		if len(*taskBuf) == 0 {
-			*buf = "No tasks found"
+		*buf = "No tasks found"
+		if len(*taskBuf) != 0 {
+			*buf = (*taskBuf)[0].TaskData
 		}
 
 		h.log.Info("Get task",
@@ -187,6 +191,10 @@ func (h *WSHandler) handleMessage(src string, buf *string) error {
 			zap.String("reqTrace", reqTrace),
 			zap.Int("task_len", len(*buf)))
 	}
+
+	h.log.Info("Request successfully processed",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace))
 
 	return nil
 }

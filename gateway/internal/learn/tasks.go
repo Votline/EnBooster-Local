@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 	"unsafe"
 
 	pb "github.com/Votline/EnBooster-Local/protos/generated-learn"
@@ -33,7 +32,7 @@ func (ls *LearnService) NewTasks(msg, reqTrace string) (int32, error) {
 		zap.Int("msg len", len(msg)),
 		zap.String("reqTrace", reqTrace))
 
-	ctx, cancel := context.WithTimeout(context.Background(), ls.ctxTimeout*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ls.ctxTimeout)
 	defer cancel()
 
 	res, err := ls.client.NewTasks(ctx, &pb.NewTasksReq{
@@ -62,7 +61,7 @@ func (ls *LearnService) GetTasks(level string, pos, limit int32, tasksList *[]Ta
 		zap.Int32("pos", pos),
 		zap.String("reqTrace", reqTrace))
 
-	ctx, cancel := context.WithTimeout(context.Background(), ls.ctxTimeout*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ls.ctxTimeout)
 	defer cancel()
 
 	tasks, err := ls.client.GetTasks(ctx, &pb.GetTasksReq{
@@ -99,7 +98,7 @@ func (ls *LearnService) DelTask(msg, reqTrace string) error {
 		zap.Int("msg len", len(msg)),
 		zap.String("reqTrace", reqTrace))
 
-	ctx, cancel := context.WithTimeout(context.Background(), ls.ctxTimeout*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ls.ctxTimeout)
 	defer cancel()
 
 	msgBytes := unsafe.Slice(unsafe.StringData(msg), len(msg))

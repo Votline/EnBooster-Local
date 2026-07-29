@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 	"unsafe"
 
 	pb "github.com/Votline/EnBooster-Local/protos/generated-learn"
@@ -34,7 +33,7 @@ func (ls *LearnService) NewWords(msg, reqTrace string) (int32, error) {
 		zap.Int("msg len", len(msg)),
 		zap.String("reqTrace", reqTrace))
 
-	ctx, cancel := context.WithTimeout(context.Background(), ls.ctxTimeout*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ls.ctxTimeout)
 	defer cancel()
 
 	res, err := ls.client.NewWords(ctx, &pb.NewWordsReq{
@@ -62,7 +61,7 @@ func (ls *LearnService) GetWords(searchData, reqTrace string, limit int32, buf *
 		zap.Int("searchData len", len(searchData)),
 		zap.String("reqTrace", reqTrace))
 
-	ctx, cancel := context.WithTimeout(context.Background(), ls.ctxTimeout*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ls.ctxTimeout)
 	defer cancel()
 
 	res, err := ls.client.GetWords(ctx, &pb.GetWordsReq{
@@ -99,7 +98,7 @@ func (ls *LearnService) GetWordsWithTarget(userWord, lastLetter, reqTrace string
 		zap.Int("offsetID", offsetID),
 		zap.String("reqTrace", reqTrace))
 
-	ctx, cancel := context.WithTimeout(context.Background(), ls.ctxTimeout*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ls.ctxTimeout)
 	defer cancel()
 
 	res, err := ls.client.GetWordsWithTarget(ctx, &pb.GetWordsWithTargetReq{
@@ -144,7 +143,7 @@ func (ls *LearnService) DelWord(msg, reqTrace string) error {
 		zap.Int("msg len", len(msg)),
 		zap.String("reqTrace", reqTrace))
 
-	ctx, cancel := context.WithTimeout(context.Background(), ls.ctxTimeout*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ls.ctxTimeout)
 	defer cancel()
 
 	msgBytes := unsafe.Slice(unsafe.StringData(msg), len(msg))
