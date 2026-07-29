@@ -3,11 +3,6 @@ syntax = "proto3";
 package users;
 option go_package="generated-users/;usersservice";
 
-message RegReq {
-  string request_trace = 1;
-}
-message RegRes {}
-
 message GetReq {
   string request_trace = 1;
 }
@@ -28,7 +23,6 @@ message UpdLangLevelReq {
 message UpdLangLevelRes {}
 
 service UsersService {
-  rpc RegUser (RegReq) returns (RegRes);
   rpc GetUser (GetReq) returns (GetRes);
   rpc UpdSystemPrompt (UpdSystemPromptReq) returns (UpdSystemPromptRes);
   rpc UpdLangLevel (UpdLangLevelReq) returns (UpdLangLevelRes);

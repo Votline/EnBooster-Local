@@ -21,86 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type RegReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	RequestTrace  string                 `protobuf:"bytes,1,opt,name=request_trace,json=requestTrace,proto3" json:"request_trace,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RegReq) Reset() {
-	*x = RegReq{}
-	mi := &file_users_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RegReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RegReq) ProtoMessage() {}
-
-func (x *RegReq) ProtoReflect() protoreflect.Message {
-	mi := &file_users_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RegReq.ProtoReflect.Descriptor instead.
-func (*RegReq) Descriptor() ([]byte, []int) {
-	return file_users_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *RegReq) GetRequestTrace() string {
-	if x != nil {
-		return x.RequestTrace
-	}
-	return ""
-}
-
-type RegRes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RegRes) Reset() {
-	*x = RegRes{}
-	mi := &file_users_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RegRes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RegRes) ProtoMessage() {}
-
-func (x *RegRes) ProtoReflect() protoreflect.Message {
-	mi := &file_users_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RegRes.ProtoReflect.Descriptor instead.
-func (*RegRes) Descriptor() ([]byte, []int) {
-	return file_users_proto_rawDescGZIP(), []int{1}
-}
-
 type GetReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RequestTrace  string                 `protobuf:"bytes,1,opt,name=request_trace,json=requestTrace,proto3" json:"request_trace,omitempty"`
@@ -110,7 +30,7 @@ type GetReq struct {
 
 func (x *GetReq) Reset() {
 	*x = GetReq{}
-	mi := &file_users_proto_msgTypes[2]
+	mi := &file_users_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -122,7 +42,7 @@ func (x *GetReq) String() string {
 func (*GetReq) ProtoMessage() {}
 
 func (x *GetReq) ProtoReflect() protoreflect.Message {
-	mi := &file_users_proto_msgTypes[2]
+	mi := &file_users_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -135,7 +55,7 @@ func (x *GetReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetReq.ProtoReflect.Descriptor instead.
 func (*GetReq) Descriptor() ([]byte, []int) {
-	return file_users_proto_rawDescGZIP(), []int{2}
+	return file_users_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *GetReq) GetRequestTrace() string {
@@ -154,7 +74,7 @@ type GetRes struct {
 
 func (x *GetRes) Reset() {
 	*x = GetRes{}
-	mi := &file_users_proto_msgTypes[3]
+	mi := &file_users_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -166,7 +86,7 @@ func (x *GetRes) String() string {
 func (*GetRes) ProtoMessage() {}
 
 func (x *GetRes) ProtoReflect() protoreflect.Message {
-	mi := &file_users_proto_msgTypes[3]
+	mi := &file_users_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -179,7 +99,7 @@ func (x *GetRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRes.ProtoReflect.Descriptor instead.
 func (*GetRes) Descriptor() ([]byte, []int) {
-	return file_users_proto_rawDescGZIP(), []int{3}
+	return file_users_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *GetRes) GetData() string {
@@ -199,7 +119,7 @@ type UpdSystemPromptReq struct {
 
 func (x *UpdSystemPromptReq) Reset() {
 	*x = UpdSystemPromptReq{}
-	mi := &file_users_proto_msgTypes[4]
+	mi := &file_users_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -211,7 +131,7 @@ func (x *UpdSystemPromptReq) String() string {
 func (*UpdSystemPromptReq) ProtoMessage() {}
 
 func (x *UpdSystemPromptReq) ProtoReflect() protoreflect.Message {
-	mi := &file_users_proto_msgTypes[4]
+	mi := &file_users_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -224,7 +144,7 @@ func (x *UpdSystemPromptReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdSystemPromptReq.ProtoReflect.Descriptor instead.
 func (*UpdSystemPromptReq) Descriptor() ([]byte, []int) {
-	return file_users_proto_rawDescGZIP(), []int{4}
+	return file_users_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UpdSystemPromptReq) GetSystemPrompt() string {
@@ -249,7 +169,7 @@ type UpdSystemPromptRes struct {
 
 func (x *UpdSystemPromptRes) Reset() {
 	*x = UpdSystemPromptRes{}
-	mi := &file_users_proto_msgTypes[5]
+	mi := &file_users_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -261,7 +181,7 @@ func (x *UpdSystemPromptRes) String() string {
 func (*UpdSystemPromptRes) ProtoMessage() {}
 
 func (x *UpdSystemPromptRes) ProtoReflect() protoreflect.Message {
-	mi := &file_users_proto_msgTypes[5]
+	mi := &file_users_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -274,7 +194,7 @@ func (x *UpdSystemPromptRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdSystemPromptRes.ProtoReflect.Descriptor instead.
 func (*UpdSystemPromptRes) Descriptor() ([]byte, []int) {
-	return file_users_proto_rawDescGZIP(), []int{5}
+	return file_users_proto_rawDescGZIP(), []int{3}
 }
 
 type UpdLangLevelReq struct {
@@ -287,7 +207,7 @@ type UpdLangLevelReq struct {
 
 func (x *UpdLangLevelReq) Reset() {
 	*x = UpdLangLevelReq{}
-	mi := &file_users_proto_msgTypes[6]
+	mi := &file_users_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -299,7 +219,7 @@ func (x *UpdLangLevelReq) String() string {
 func (*UpdLangLevelReq) ProtoMessage() {}
 
 func (x *UpdLangLevelReq) ProtoReflect() protoreflect.Message {
-	mi := &file_users_proto_msgTypes[6]
+	mi := &file_users_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -312,7 +232,7 @@ func (x *UpdLangLevelReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdLangLevelReq.ProtoReflect.Descriptor instead.
 func (*UpdLangLevelReq) Descriptor() ([]byte, []int) {
-	return file_users_proto_rawDescGZIP(), []int{6}
+	return file_users_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *UpdLangLevelReq) GetLevel() string {
@@ -337,7 +257,7 @@ type UpdLangLevelRes struct {
 
 func (x *UpdLangLevelRes) Reset() {
 	*x = UpdLangLevelRes{}
-	mi := &file_users_proto_msgTypes[7]
+	mi := &file_users_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -349,7 +269,7 @@ func (x *UpdLangLevelRes) String() string {
 func (*UpdLangLevelRes) ProtoMessage() {}
 
 func (x *UpdLangLevelRes) ProtoReflect() protoreflect.Message {
-	mi := &file_users_proto_msgTypes[7]
+	mi := &file_users_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -362,7 +282,7 @@ func (x *UpdLangLevelRes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdLangLevelRes.ProtoReflect.Descriptor instead.
 func (*UpdLangLevelRes) Descriptor() ([]byte, []int) {
-	return file_users_proto_rawDescGZIP(), []int{7}
+	return file_users_proto_rawDescGZIP(), []int{5}
 }
 
 var File_users_proto protoreflect.FileDescriptor
@@ -370,9 +290,6 @@ var File_users_proto protoreflect.FileDescriptor
 const file_users_proto_rawDesc = "" +
 	"\n" +
 	"\vusers.proto\x12\x05users\"-\n" +
-	"\x06RegReq\x12#\n" +
-	"\rrequest_trace\x18\x01 \x01(\tR\frequestTrace\"\b\n" +
-	"\x06RegRes\"-\n" +
 	"\x06GetReq\x12#\n" +
 	"\rrequest_trace\x18\x01 \x01(\tR\frequestTrace\"\x1c\n" +
 	"\x06GetRes\x12\x12\n" +
@@ -384,9 +301,8 @@ const file_users_proto_rawDesc = "" +
 	"\x0fUpdLangLevelReq\x12\x14\n" +
 	"\x05level\x18\x01 \x01(\tR\x05level\x12#\n" +
 	"\rrequest_trace\x18\x02 \x01(\tR\frequestTrace\"\x11\n" +
-	"\x0fUpdLangLevelRes2\xe9\x01\n" +
+	"\x0fUpdLangLevelRes2\xc0\x01\n" +
 	"\fUsersService\x12'\n" +
-	"\aRegUser\x12\r.users.RegReq\x1a\r.users.RegRes\x12'\n" +
 	"\aGetUser\x12\r.users.GetReq\x1a\r.users.GetRes\x12G\n" +
 	"\x0fUpdSystemPrompt\x12\x19.users.UpdSystemPromptReq\x1a\x19.users.UpdSystemPromptRes\x12>\n" +
 	"\fUpdLangLevel\x12\x16.users.UpdLangLevelReq\x1a\x16.users.UpdLangLevelResB\x1fZ\x1dgenerated-users/;usersserviceb\x06proto3"
@@ -403,28 +319,24 @@ func file_users_proto_rawDescGZIP() []byte {
 	return file_users_proto_rawDescData
 }
 
-var file_users_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_users_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_users_proto_goTypes = []any{
-	(*RegReq)(nil),             // 0: users.RegReq
-	(*RegRes)(nil),             // 1: users.RegRes
-	(*GetReq)(nil),             // 2: users.GetReq
-	(*GetRes)(nil),             // 3: users.GetRes
-	(*UpdSystemPromptReq)(nil), // 4: users.UpdSystemPromptReq
-	(*UpdSystemPromptRes)(nil), // 5: users.UpdSystemPromptRes
-	(*UpdLangLevelReq)(nil),    // 6: users.UpdLangLevelReq
-	(*UpdLangLevelRes)(nil),    // 7: users.UpdLangLevelRes
+	(*GetReq)(nil),             // 0: users.GetReq
+	(*GetRes)(nil),             // 1: users.GetRes
+	(*UpdSystemPromptReq)(nil), // 2: users.UpdSystemPromptReq
+	(*UpdSystemPromptRes)(nil), // 3: users.UpdSystemPromptRes
+	(*UpdLangLevelReq)(nil),    // 4: users.UpdLangLevelReq
+	(*UpdLangLevelRes)(nil),    // 5: users.UpdLangLevelRes
 }
 var file_users_proto_depIdxs = []int32{
-	0, // 0: users.UsersService.RegUser:input_type -> users.RegReq
-	2, // 1: users.UsersService.GetUser:input_type -> users.GetReq
-	4, // 2: users.UsersService.UpdSystemPrompt:input_type -> users.UpdSystemPromptReq
-	6, // 3: users.UsersService.UpdLangLevel:input_type -> users.UpdLangLevelReq
-	1, // 4: users.UsersService.RegUser:output_type -> users.RegRes
-	3, // 5: users.UsersService.GetUser:output_type -> users.GetRes
-	5, // 6: users.UsersService.UpdSystemPrompt:output_type -> users.UpdSystemPromptRes
-	7, // 7: users.UsersService.UpdLangLevel:output_type -> users.UpdLangLevelRes
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	0, // 0: users.UsersService.GetUser:input_type -> users.GetReq
+	2, // 1: users.UsersService.UpdSystemPrompt:input_type -> users.UpdSystemPromptReq
+	4, // 2: users.UsersService.UpdLangLevel:input_type -> users.UpdLangLevelReq
+	1, // 3: users.UsersService.GetUser:output_type -> users.GetRes
+	3, // 4: users.UsersService.UpdSystemPrompt:output_type -> users.UpdSystemPromptRes
+	5, // 5: users.UsersService.UpdLangLevel:output_type -> users.UpdLangLevelRes
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -441,7 +353,7 @@ func file_users_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_users_proto_rawDesc), len(file_users_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

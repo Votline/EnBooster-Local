@@ -19,7 +19,6 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UsersService_RegUser_FullMethodName         = "/users.UsersService/RegUser"
 	UsersService_GetUser_FullMethodName         = "/users.UsersService/GetUser"
 	UsersService_UpdSystemPrompt_FullMethodName = "/users.UsersService/UpdSystemPrompt"
 	UsersService_UpdLangLevel_FullMethodName    = "/users.UsersService/UpdLangLevel"
@@ -29,7 +28,6 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UsersServiceClient interface {
-	RegUser(ctx context.Context, in *RegReq, opts ...grpc.CallOption) (*RegRes, error)
 	GetUser(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetRes, error)
 	UpdSystemPrompt(ctx context.Context, in *UpdSystemPromptReq, opts ...grpc.CallOption) (*UpdSystemPromptRes, error)
 	UpdLangLevel(ctx context.Context, in *UpdLangLevelReq, opts ...grpc.CallOption) (*UpdLangLevelRes, error)
@@ -41,16 +39,6 @@ type usersServiceClient struct {
 
 func NewUsersServiceClient(cc grpc.ClientConnInterface) UsersServiceClient {
 	return &usersServiceClient{cc}
-}
-
-func (c *usersServiceClient) RegUser(ctx context.Context, in *RegReq, opts ...grpc.CallOption) (*RegRes, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RegRes)
-	err := c.cc.Invoke(ctx, UsersService_RegUser_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *usersServiceClient) GetUser(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetRes, error) {
@@ -87,7 +75,6 @@ func (c *usersServiceClient) UpdLangLevel(ctx context.Context, in *UpdLangLevelR
 // All implementations must embed UnimplementedUsersServiceServer
 // for forward compatibility.
 type UsersServiceServer interface {
-	RegUser(context.Context, *RegReq) (*RegRes, error)
 	GetUser(context.Context, *GetReq) (*GetRes, error)
 	UpdSystemPrompt(context.Context, *UpdSystemPromptReq) (*UpdSystemPromptRes, error)
 	UpdLangLevel(context.Context, *UpdLangLevelReq) (*UpdLangLevelRes, error)
@@ -101,9 +88,6 @@ type UsersServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedUsersServiceServer struct{}
 
-func (UnimplementedUsersServiceServer) RegUser(context.Context, *RegReq) (*RegRes, error) {
-	return nil, status.Error(codes.Unimplemented, "method RegUser not implemented")
-}
 func (UnimplementedUsersServiceServer) GetUser(context.Context, *GetReq) (*GetRes, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUser not implemented")
 }
@@ -132,24 +116,6 @@ func RegisterUsersServiceServer(s grpc.ServiceRegistrar, srv UsersServiceServer)
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&UsersService_ServiceDesc, srv)
-}
-
-func _UsersService_RegUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RegReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UsersServiceServer).RegUser(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UsersService_RegUser_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsersServiceServer).RegUser(ctx, req.(*RegReq))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _UsersService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -213,10 +179,6 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "users.UsersService",
 	HandlerType: (*UsersServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "RegUser",
-			Handler:    _UsersService_RegUser_Handler,
-		},
 		{
 			MethodName: "GetUser",
 			Handler:    _UsersService_GetUser_Handler,
