@@ -25,8 +25,21 @@ onMounted(() => {
 
     socket.onmessage = (event) => {
         try {
-            const botMsg = JSON.parse(event.data)
-            messages.value.push(botMsg)
+            const data = JSON.parse(event.data)
+
+            const botMsg = data.req_trace 
+                ? messages.value.find(m => m.req_trace === data.req_trace && !m.isMe)
+                : null
+
+            if (botMsg) {
+                botMsg.text = data.text
+            } else {
+                messages.value.push({
+                    req_trace: data.req_trace,
+                    text: data.text,
+                    isMe: false
+                })
+            }
             scrollToBottom()
         } catch (err) {
             console.error('Ошибка парсинга JSON:', err)
@@ -41,17 +54,14 @@ onMounted(() => {
 const onSend = (text) => {
     if (!text.trim()) return
 
-    const userMsg = {
-        id: Date.now(),
+    messages.value.push({
         text: text,
         isMe: true
-    }
-
-    messages.value.push(userMsg)
+    })
     scrollToBottom()
 
     if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify(userMsg))
+        socket.send(JSON.stringify({ text: text }))
     } else {
         console.error('Сокет не активен!')
     }
