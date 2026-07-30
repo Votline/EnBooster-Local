@@ -43,11 +43,12 @@ func (h *WSHandler) handleUser(buf *string, auBuf *bytes.Buffer, uctx stm.UserCo
 		zap.String("reqTrace", reqTrace))
 
 	msg := strings.ToLower(src.Text)
-	if msg == "stop" && uctx.State != stm.StateShiritori {
+	if msg == "/stop" && uctx.State != stm.StateShiritori {
 		if err := h.sm.UpdUserStateCtx(stm.StateNone); err != nil {
 			return fmt.Errorf("%s: update state: %w", op, err)
 		}
 		*buf = "Successfully stopped"
+		return nil
 	}
 
 	switch uctx.State {
@@ -241,6 +242,43 @@ func (h *WSHandler) handleUser(buf *string, auBuf *bytes.Buffer, uctx stm.UserCo
 			return fmt.Errorf("%s: state tts: %w", op, err)
 		}
 		*buf = ""
+	case stm.StateSTT:
+		h.conn.WriteJSON(chatMsg{
+			Text:     "AI is recognizing audio...",
+			ReqTrace: reqTrace,
+		})
+
+		fullText := ""
+		if err := h.handleVoice(src.OGGBytes, reqTrace, func(text string) {
+			fullText = text
+			h.conn.WriteJSON(chatMsg{
+				Text:     fullText,
+				ReqTrace: reqTrace,
+			})
+		}); err != nil {
+			return fmt.Errorf("%s: state stt: %w", op, err)
+		}
+
+		*buf = fullText
+	case stm.StateSTS:
+		h.conn.WriteJSON(chatMsg{
+			Text:     "AI is recognizing audio...",
+			ReqTrace: reqTrace,
+		})
+
+		if err := h.handleVoice(src.OGGBytes, reqTrace, func(text string) {
+			auBuf.WriteString(text)
+		}); err != nil {
+			return fmt.Errorf("%s: state sts: %w", op, err)
+		}
+
+		recognizedText := auBuf.String()
+		auBuf.Reset()
+
+		if err := h.handleTTS(uctx, auBuf, recognizedText, reqTrace); err != nil {
+			return fmt.Errorf("%s: state sts: %w", op, err)
+		}
+		*buf = ""
 	default:
 		*buf = "no handled"
 	}
@@ -341,6 +379,26 @@ func (h *WSHandler) handleTTS(uctx stm.UserContext, auBuf *bytes.Buffer, usrMsg,
 		OGGBytes: auBuf.Bytes(),
 		ReqTrace: reqTrace,
 	})
+
+	return nil
+}
+
+// handleVoice handles voice messages, call recognition service and yields
+// the result to the given callback function.
+func (h *WSHandler) handleVoice(oggBytes []byte, reqTrace string, yield func(text string)) error {
+	const op = "router.user.handleVoice"
+
+	h.log.Debug("Recognize audio request",
+		zap.String("op", op),
+		zap.String("request_trace", reqTrace))
+
+	if err := h.aisrv.RecognizeAudio(oggBytes, reqTrace, yield); err != nil {
+		return fmt.Errorf("%s: generate text: %w", op, err)
+	}
+
+	h.log.Debug("Recognize audio successfully",
+		zap.String("op", op),
+		zap.String("request_trace", reqTrace))
 
 	return nil
 }
