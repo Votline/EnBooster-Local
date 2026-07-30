@@ -35,14 +35,14 @@ var aiTextPool = sync.Pool{
 	},
 }
 
-func (h *WSHandler) handleUser(buf *string, uctx stm.UserContext, src, reqTrace string) error {
+func (h *WSHandler) handleUser(buf *string, auBuf *bytes.Buffer, uctx stm.UserContext, src chatMsg, reqTrace string) error {
 	const op = "delivery.handleUser"
 
 	h.log.Info("handle user content",
 		zap.String("op", op),
 		zap.String("reqTrace", reqTrace))
 
-	msg := strings.ToLower(src)
+	msg := strings.ToLower(src.Text)
 	if msg == "stop" && uctx.State != stm.StateShiritori {
 		if err := h.sm.UpdUserStateCtx(stm.StateNone); err != nil {
 			return fmt.Errorf("%s: update state: %w", op, err)
@@ -61,7 +61,7 @@ func (h *WSHandler) handleUser(buf *string, uctx stm.UserContext, src, reqTrace 
 		}
 
 		add := 0
-		userAnswer := src
+		userAnswer := src.Text
 		answer := taskSes.Answer
 		theme := taskSes.CurrentTheme
 		correct := h.lrnsrv.VerifyAnswer(userAnswer, answer, reqTrace)
@@ -122,9 +122,9 @@ func (h *WSHandler) handleUser(buf *string, uctx stm.UserContext, src, reqTrace 
 		lastLetter := lastLetterPool.Get().(*string)
 		defer lastLetterPool.Put(lastLetter)
 
-		h.lrnsrv.GetLastLetter(src, lastLetter)
+		h.lrnsrv.GetLastLetter(src.Text, lastLetter)
 		if *lastLetter == "" {
-			*buf = "Invalid word: " + src
+			*buf = "Invalid word: " + src.Text
 			return nil
 		}
 
@@ -138,7 +138,7 @@ func (h *WSHandler) handleUser(buf *string, uctx stm.UserContext, src, reqTrace 
 		wordsPtr := wordsPool.Get().(*[]learn.Word)
 		defer wordsPool.Put(wordsPtr)
 
-		found, err := h.lrnsrv.GetWordsWithTarget(src, *lastLetter, reqTrace, offsetID, wordsPtr)
+		found, err := h.lrnsrv.GetWordsWithTarget(src.Text, *lastLetter, reqTrace, offsetID, wordsPtr)
 		if err != nil {
 			return fmt.Errorf("%s: get words: %w", op, err)
 		}
@@ -149,7 +149,7 @@ func (h *WSHandler) handleUser(buf *string, uctx stm.UserContext, src, reqTrace 
 			if err := h.saveState(shirSes); err != nil {
 				return fmt.Errorf("%s: save state: %w", op, err)
 			}
-			*buf = "Your word not found: " + src
+			*buf = "Your word not found: " + src.Text
 			return nil
 		}
 
@@ -177,7 +177,7 @@ func (h *WSHandler) handleUser(buf *string, uctx stm.UserContext, src, reqTrace 
 		// update user shiritori ctx with get bools for shiritori rules
 		// inside the method also increment user CORRECT words
 		repeat, notMatch, err := h.usrsrv.UpdateUserShiritoriCtx(
-			&shirSes, src, *lastLetter, botWord, *botLastLetter,
+			&shirSes, src.Text, *lastLetter, botWord, *botLastLetter,
 			botWordID, stm.StateShiritori)
 		if err != nil {
 			return fmt.Errorf("%s: update user shiritori ctx: %w", op, err)
@@ -186,7 +186,7 @@ func (h *WSHandler) handleUser(buf *string, uctx stm.UserContext, src, reqTrace 
 		// shiritori rules
 
 		if repeat {
-			*buf = "You already used this word: " + src
+			*buf = "You already used this word: " + src.Text
 			return nil
 		}
 
@@ -216,8 +216,6 @@ func (h *WSHandler) handleUser(buf *string, uctx stm.UserContext, src, reqTrace 
 		}
 		*buf = "AI settings updated"
 	case stm.StateTTT:
-		h.log.Info("got")
-
 		h.conn.WriteJSON(chatMsg{
 			Text:     "AI is generating text...",
 			ReqTrace: reqTrace,
@@ -227,7 +225,7 @@ func (h *WSHandler) handleUser(buf *string, uctx stm.UserContext, src, reqTrace 
 		resBuf.Reset()
 		defer aiTextPool.Put(resBuf)
 
-		if err := h.generateText(uctx, src, reqTrace, func(text string) {
+		if err := h.generateText(uctx, src.Text, reqTrace, func(text string) {
 			resBuf.WriteString(text)
 			h.conn.WriteJSON(chatMsg{
 				Text:     resBuf.String(),
@@ -238,6 +236,11 @@ func (h *WSHandler) handleUser(buf *string, uctx stm.UserContext, src, reqTrace 
 		}
 
 		*buf = resBuf.String()
+	case stm.StateTTS:
+		if err := h.handleTTS(uctx, auBuf, src.Text, reqTrace); err != nil {
+			return fmt.Errorf("%s: state tts: %w", op, err)
+		}
+		*buf = ""
 	default:
 		*buf = "no handled"
 	}
@@ -300,6 +303,44 @@ func (h *WSHandler) generateText(uctx stm.UserContext, src, reqTrace string, yie
 	if err := h.sm.UpdateUserDataCtx(jsonData); err != nil {
 		return fmt.Errorf("%s: update user data: %w", op, err)
 	}
+
+	return nil
+}
+
+// handleTTS handles TTS messages, call AI service and yields
+// the result to the given callback function.
+func (h *WSHandler) handleTTS(uctx stm.UserContext, auBuf *bytes.Buffer, usrMsg, reqTrace string) error {
+	const op = "router.user.handleTTS"
+
+	h.conn.WriteJSON(chatMsg{
+		Text:     "AI is generating text...",
+		ReqTrace: reqTrace,
+	})
+
+	if err := h.generateText(uctx, usrMsg, reqTrace, func(text string) {
+		auBuf.WriteString(text)
+	}); err != nil {
+		return fmt.Errorf("%s: generate text: %w", op, err)
+	}
+
+	generatedText := auBuf.String()
+	auBuf.Reset()
+
+	h.conn.WriteJSON(chatMsg{
+		Text:     "Successfully generated text. AI is generating audio...",
+		ReqTrace: reqTrace,
+	})
+
+	if err := h.aisrv.GenerateAudio(generatedText, reqTrace, func(audio []byte) {
+		auBuf.Write(audio)
+	}); err != nil {
+		return fmt.Errorf("%s: generate audio: %w", op, err)
+	}
+
+	h.conn.WriteJSON(chatMsg{
+		OGGBytes: auBuf.Bytes(),
+		ReqTrace: reqTrace,
+	})
 
 	return nil
 }

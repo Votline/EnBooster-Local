@@ -3,6 +3,7 @@
 package delivery
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"os"
@@ -34,8 +35,9 @@ type WSHandler struct {
 
 // chatMsg used for send/accept message from frontend
 type chatMsg struct {
-	Text     string `json:"text"`
-	ReqTrace string `json:"req_trace"`
+	Text     string `json:"text,omitempty"`
+	ReqTrace string `json:"req_trace,omitempty"`
+	OGGBytes []byte `json:"ogg_bytes,omitempty"`
 }
 
 // tasksPool used for getting tasks
@@ -43,6 +45,14 @@ var tasksPool = sync.Pool{
 	New: func() any {
 		buf := make([]learn.Task, 0, 1)
 		return &buf
+	},
+}
+
+// audioPool used for getting audio
+var audioPool = sync.Pool{
+	New: func() any {
+		buf := bytes.NewBuffer(make([]byte, 0, 4096))
+		return buf
 	},
 }
 
@@ -140,8 +150,12 @@ func (h *WSHandler) HandleChatWS(w http.ResponseWriter, r *http.Request) {
 			zap.String("op", op))
 
 		answer = ""
+		audioAnswer := audioPool.Get().(*bytes.Buffer)
+		audioAnswer.Reset()
+		defer audioPool.Put(audioAnswer)
+
 		reqTrace := uuid.NewString()
-		if err := h.handleMessage(reqTrace, msg.Text, &answer); err != nil {
+		if err := h.handleMessage(reqTrace, msg, &answer, audioAnswer); err != nil {
 			answer = "Something went wrong. Try again later"
 			h.log.Error("handleMessage failed",
 				zap.String("op", op),
@@ -149,9 +163,17 @@ func (h *WSHandler) HandleChatWS(w http.ResponseWriter, r *http.Request) {
 				zap.Error(err))
 		}
 
-		reply := chatMsg{
-			Text:     answer,
-			ReqTrace: reqTrace,
+		var reply chatMsg
+		if audioAnswer.Len() == 0 {
+			reply = chatMsg{
+				Text:     answer,
+				ReqTrace: reqTrace,
+			}
+		} else {
+			reply = chatMsg{
+				ReqTrace: reqTrace,
+				OGGBytes: audioAnswer.Bytes(),
+			}
 		}
 
 		if err := conn.WriteJSON(reply); err != nil {
@@ -165,7 +187,7 @@ func (h *WSHandler) HandleChatWS(w http.ResponseWriter, r *http.Request) {
 
 // handleMessage handles incoming messages
 // and call needed services
-func (h *WSHandler) handleMessage(reqTrace, src string, buf *string) error {
+func (h *WSHandler) handleMessage(reqTrace string, src chatMsg, buf *string, auBuf *bytes.Buffer) error {
 	const op = "delivery.handleUser"
 
 	uctx, err := h.sm.GetUserCtx()
@@ -173,7 +195,7 @@ func (h *WSHandler) handleMessage(reqTrace, src string, buf *string) error {
 		return fmt.Errorf("%s: get user state: %w", op, err)
 	}
 
-	msg := strings.ToLower(src)
+	msg := strings.ToLower(src.Text)
 
 	h.log.Info("New request",
 		zap.String("op", op),
@@ -196,7 +218,7 @@ func (h *WSHandler) handleMessage(reqTrace, src string, buf *string) error {
 			return fmt.Errorf("%s: unexpected error: %w", op, err)
 		}
 	default:
-		if err := h.handleDefault(buf, uctx, src, reqTrace); err != nil {
+		if err := h.handleDefault(buf, auBuf, uctx, src, reqTrace); err != nil {
 			return fmt.Errorf("%s: unexpected error: %w", op, err)
 		}
 	}
@@ -210,18 +232,18 @@ func (h *WSHandler) handleMessage(reqTrace, src string, buf *string) error {
 
 // handleDefault processed default content (messages and state)
 // via call handleAdmin and handleUser methods
-func (h *WSHandler) handleDefault(buf *string, uctx stm.UserContext, msg, reqTrace string) error {
+func (h *WSHandler) handleDefault(buf *string, auBuf *bytes.Buffer, uctx stm.UserContext, src chatMsg, reqTrace string) error {
 	const op = "delivery.handleDefault"
 
 	h.log.Info("handle default content",
 		zap.String("op", op),
 		zap.String("reqTrace", reqTrace))
 
-	if err := h.handleAdmin(buf, uctx, msg, reqTrace); err != nil {
+	if err := h.handleAdmin(buf, uctx, src.Text, reqTrace); err != nil {
 		return fmt.Errorf("%s: unexpected error: %w", op, err)
 	}
 	if *buf == "no handled" {
-		if err := h.handleUser(buf, uctx, msg, reqTrace); err != nil {
+		if err := h.handleUser(buf, auBuf, uctx, src, reqTrace); err != nil {
 			return fmt.Errorf("%s: unexpected error: %w", op, err)
 		}
 	}
