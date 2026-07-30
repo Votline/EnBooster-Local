@@ -72,6 +72,7 @@ func GetEnvInt(key string, defaultVal int) int {
 func NewWSH(log *zap.Logger) (*WSHandler, error) {
 	const op = "delivery.NewWSH"
 	ctxtimeout := time.Duration(GetEnvInt("CTX_TIMEOUT", 10)) * time.Second
+	aitimeout := time.Duration(GetEnvInt("AI_TIMEOUT", 30)) * time.Second
 	statettl := time.Duration(GetEnvInt("STATE_TTL", 30)) * time.Minute
 	pingtimeout := time.Duration(GetEnvInt("PING_TIMEOUT", 10)) * time.Second
 
@@ -92,7 +93,7 @@ func NewWSH(log *zap.Logger) (*WSHandler, error) {
 		return nil, fmt.Errorf("%s: create learn-service: %w", op, err)
 	}
 
-	aisrv, err := ai.NewAIS(ctxtimeout, stmngr, log)
+	aisrv, err := ai.NewAIS(aitimeout, stmngr, log)
 	if err != nil {
 		return nil, fmt.Errorf("%s: create ai-service: %w", op, err)
 	}
