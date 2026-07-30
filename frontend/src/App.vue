@@ -33,10 +33,12 @@ onMounted(() => {
 
             if (botMsg) {
                 botMsg.text = data.text
+                if (data.ogg_bytes) botMsg.audioData = data.ogg_bytes
             } else {
                 messages.value.push({
                     req_trace: data.req_trace,
                     text: data.text,
+                    audioData: data.ogg_bytes || null,
                     isMe: false
                 })
             }
@@ -66,6 +68,28 @@ const onSend = (text) => {
         console.error('Сокет не активен!')
     }
 }
+
+const onSendAudio = async (blob) => {
+    messages.value.push({
+        audioData: blob,
+        isMe: true
+    })
+    scrollToBottom()
+
+    const reader = new FileReader()
+    reader.readAsDataURL(blob)
+    reader.onloadend = () => {
+        const base64Audio = reader.result.split(',')[1]
+
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                ogg_bytes: base64Audio
+            }))
+        } else {
+            console.error('Сокет не активен!')
+        }
+    }
+}
 </script>
 
 <template>
@@ -73,13 +97,14 @@ const onSend = (text) => {
         <MainBox>
             <div ref="chatContainer" class="messages-container">
                 <MessageItem 
-                    v-for="msg in messages" 
-                    :key="msg.id" 
+                    v-for="(msg, index) in messages" 
+                    :key="index" 
                     :text="msg.text" 
+                    :audio-data="msg.audioData"
                     :is-me="msg.isMe" 
                 />
             </div>
-            <InputField @send="onSend" />
+            <InputField @send="onSend" @send-audio="onSendAudio" />
         </MainBox>
     </Background>
 </template>

@@ -1,8 +1,14 @@
 <script setup>
+import AudioMessage from './AudioMessage.vue'
+
 defineProps({
     text: {
         type: String,
-        required: true
+        default: ''
+    },
+    audioData: {
+        type: [ArrayBuffer, Uint8Array, String, Blob],
+        default: null
     },
     isMe: {
         type: Boolean,
@@ -14,7 +20,8 @@ defineProps({
 <template>
     <div class="message-wrapper" :class="{ 'is-me': isMe }">
         <div class="message-bubble">
-            {{ text }}
+            <AudioMessage v-if="audioData" :audio-data="audioData" />
+            <span v-if="text">{{ text }}</span>
         </div>
     </div>
 </template>
