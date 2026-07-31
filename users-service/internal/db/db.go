@@ -259,7 +259,7 @@ func (d *DB) UpdateSystemPrompt(ctx context.Context, uuid int64, sp, reqTrace st
 	return nil
 }
 
-func (d *DB) UpdateLangLevel(ctx context.Context, uuid int64, level string, reqTrace string) error {
+func (d *DB) UpdateLangLevel(ctx context.Context, uuid int64, level, reqTrace string) error {
 	const op = "db.UpdateLangLevel"
 
 	query, args, err := d.bd.Update("users").

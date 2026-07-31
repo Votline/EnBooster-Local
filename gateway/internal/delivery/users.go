@@ -279,6 +279,12 @@ func (h *WSHandler) handleUser(buf *string, auBuf *bytes.Buffer, uctx stm.UserCo
 			return fmt.Errorf("%s: state sts: %w", op, err)
 		}
 		*buf = ""
+	case stm.StateSetLangLevel:
+		upper := strings.ToUpper(src.Text)
+		if err := h.usrsrv.UpdLangLevel(upper, reqTrace); err != nil {
+			return fmt.Errorf("%s: state setlanglevel: %w", op, err)
+		}
+		*buf = "Successfully changed level to " + upper
 	default:
 		*buf = "no handled"
 	}

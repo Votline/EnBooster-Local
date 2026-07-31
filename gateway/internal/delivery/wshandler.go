@@ -205,30 +205,26 @@ func (h *WSHandler) handleMessage(reqTrace string, src chatMsg, buf *string, auB
 
 	switch msg {
 	case "/start":
-		if err := h.sm.SetUserCtx(stm.StateNone, nil); err != nil {
-			return fmt.Errorf("%s: unexpected error: %w", op, err)
-		}
 		*buf = "Hello!"
+		err = h.sm.SetUserCtx(stm.StateNone, nil)
 	case "profile":
-		if err := h.profile(buf, reqTrace); err != nil {
-			return fmt.Errorf("%s: unexpected error: %w", op, err)
-		}
+		err = h.profile(buf, reqTrace)
+	case "changelevel":
+		*buf = "Write new english level." +
+			"Supported: A1, A2, B1, B2, C1, C2"
+		err = h.sm.UpdUserStateCtx(stm.StateSetLangLevel)
 	case "learning":
-		if err := h.learningTask(buf, uctx, reqTrace); err != nil {
-			return fmt.Errorf("%s: unexpected error: %w", op, err)
-		}
+		err = h.learning(buf, uctx, reqTrace)
 	case "shiritori":
-		if err := h.shiritori(buf, reqTrace); err != nil {
-			return fmt.Errorf("%s: unexpected error: %w", op, err)
-		}
+		err = h.shiritori(buf, reqTrace)
 	case "chatting":
-		if err := h.chatting(buf, reqTrace); err != nil {
-			return fmt.Errorf("%s: unexpected error: %w", op, err)
-		}
+		err = h.chatting(buf, reqTrace)
 	default:
-		if err := h.handleDefault(buf, auBuf, uctx, src, reqTrace); err != nil {
-			return fmt.Errorf("%s: unexpected error: %w", op, err)
-		}
+		err = h.handleDefault(buf, auBuf, uctx, src, reqTrace)
+	}
+
+	if err != nil {
+		return fmt.Errorf("%s: unexpected error: %w", op, err)
 	}
 
 	h.log.Info("Request successfully processed",
@@ -266,12 +262,12 @@ func (h *WSHandler) handleDefault(buf *string, auBuf *bytes.Buffer, uctx stm.Use
 	return nil
 }
 
-// learningTask get task for current user language level
+// learning get task for current user language level
 // and updates content in user context
-func (h *WSHandler) learningTask(buf *string, uctx stm.UserContext, reqTrace string) error {
-	const op = "delivery.learningTask"
+func (h *WSHandler) learning(buf *string, uctx stm.UserContext, reqTrace string) error {
+	const op = "delivery.learning"
 
-	h.log.Info("handle learning task",
+	h.log.Info("handle learning",
 		zap.String("op", op),
 		zap.String("reqTrace", reqTrace))
 

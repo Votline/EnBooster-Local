@@ -98,12 +98,11 @@ func (us *UsersService) UpdSystemPrompt(uuid int64, sp, reqTrace string) error {
 }
 
 // UpdLangLevel updates the language level of the user
-func (us *UsersService) UpdLangLevel(uuid int64, level string, reqTrace string) error {
+func (us *UsersService) UpdLangLevel(level string, reqTrace string) error {
 	const op = "users.UpdLangLevel"
 
 	us.log.Debug("Udp language level request",
 		zap.String("op", op),
-		zap.Int64("uuid", uuid),
 		zap.String("level", level),
 		zap.String("reqTrace", reqTrace))
 
@@ -123,7 +122,6 @@ func (us *UsersService) UpdLangLevel(uuid int64, level string, reqTrace string) 
 
 	us.log.Debug("Set language level successfully",
 		zap.String("op", op),
-		zap.Int64("uuid", uuid),
 		zap.String("level", level),
 		zap.String("reqTrace", reqTrace))
 
