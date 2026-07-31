@@ -10,18 +10,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// helpMsg is a help message for admin commands
-const helpMsg = `
-- tasks_add - add task. Format json:
-    * [{"task":" <full task message> ","level":"<english level>","answer": "<answer(s)>" }]
-- task_del - delete task. Format message:
-    * <level> <position>
-- words_add - add word. Format json:
-    * [{"word":"<word>","explain":"<explain>","level":"<english level>","first_letter":"<first letter>"}]
-- word_del - delete word. Format message:
-    * <word> <serial number>
-`
-
 // handleAdmin check message for admin commands or states
 // set 'buf' value to 'no handled' on default case
 func (h *WSHandler) handleAdmin(buf *string, uctx stm.UserContext, src, reqTrace string) error {
@@ -51,8 +39,6 @@ func (h *WSHandler) handleAdmin(buf *string, uctx stm.UserContext, src, reqTrace
 		if err := h.sm.UpdUserStateCtx(stm.StateWordsAdding); err != nil {
 			return fmt.Errorf("%s: change state: %w", op, err)
 		}
-	case "help":
-		*buf = helpMsg
 	default:
 		switch uctx.State {
 		case stm.StateTasksAdding:

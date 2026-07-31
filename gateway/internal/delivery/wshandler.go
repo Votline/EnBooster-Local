@@ -70,6 +70,32 @@ func GetEnvInt(key string, defaultVal int) int {
 	return val
 }
 
+// helpMsg explain all commands
+const helpMsg = `AVAILABLE COMMANDS:
+
+📌 User Commands
+• profile      - View your profile & progress
+• learning     - Start English learning mode
+• shiritori    - Play Shiritori/Word-chain word game
+• chatting     - Free chat with AI
+• changelevel  - Change target English level (A1-C2)
+• changeprompt - Customize AI system prompt
+• /start       - Reset current state & data
+• help         - Show this menu
+
+🛠 Admin Commands
+• tasks_add - Add new tasks (JSON format):
+  [{"task":"<message>","level":"<A1-C2>","answer":"<answer>"}]
+
+• task_del - Delete task by position:
+  <level> <position>
+
+• words_add - Add new words (JSON format):
+  [{"word":"<word>","explain":"<text>","level":"<level>","first_letter":"<char>"}]
+
+• word_del - Delete word by index:
+  <word> <serial_number>`
+
 // NewWSH creates new WSHandler instance
 func NewWSH(log *zap.Logger) (*WSHandler, error) {
 	const op = "delivery.NewWSH"
@@ -222,6 +248,8 @@ func (h *WSHandler) handleMessage(reqTrace string, src chatMsg, buf *string, auB
 	case "/start":
 		*buf = "Hello!"
 		err = h.sm.SetUserCtx(stm.StateNone, nil)
+	case "help":
+		*buf = helpMsg
 	case "profile":
 		err = h.profile(buf, reqTrace)
 	case "changelevel":
