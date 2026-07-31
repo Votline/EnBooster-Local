@@ -1,72 +1,113 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-scripts
+data:
+  1-users.sql: |
+    CREATE TABLE IF NOT EXISTS users (
+      uuid BIGINT PRIMARY KEY,
+      id SERIAL UNIQUE,
+      best_theme TEXT NOT NULL DEFAULT '',
+      best_theme_counter INT NOT NULL DEFAULT 0,
+      worst_theme TEXT NOT NULL DEFAULT '',
+      worst_theme_counter INT NOT NULL DEFAULT 0,
+      level TEXT NOT NULL DEFAULT 'A1',
+      task_id INT NOT NULL DEFAULT 1,
+      streak INT NOT NULL DEFAULT 0,
+      last_done_day BIGINT NOT NULL DEFAULT 0,
+      system_prompt TEXT NOT NULL DEFAULT ''
+    );
+  2-learn.sql: |
+    CREATE TABLE IF NOT EXISTS tasks (
+      task TEXT NOT NULL,
+      level VARCHAR(32) NOT NULL,
+      theme TEXT NOT NULL,
+      answer TEXT NOT NULL,
+      position INT DEFAULT 0,
+      PRIMARY KEY (level, position)
+    );
+
+    CREATE TABLE IF NOT EXISTS words (
+      word VARCHAR(255) NOT NULL,
+      explain TEXT NOT NULL,
+      level VARCHAR(32) NOT NULL,
+      first_letter VARCHAR(1) NOT NULL,
+      serial SERIAL PRIMARY KEY
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_words_word ON words USING btree (word);
+    CREATE INDEX IF NOT EXISTS idx_words_first_letter ON words USING btree (first_letter);
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: postgres-pvc
+  name: pgdata-pvc
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: 5Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres-local
+  name: postgres
+  labels:
+    app: postgres
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: postgres-local
+      app: postgres
   template:
     metadata:
       labels:
-        app: postgres-local
+        app: postgres
     spec:
       containers:
         - name: postgres
           image: postgres:17
+          ports:
+            - containerPort: 5432
           env:
-            - name: POSTGRES_USER
-              value: "enbooster"
             - name: POSTGRES_DB
-              value: "enbooster_db"
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: shared-secret
+                  key: POSTGRES_USER
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: enbooster-secrets
+                  name: shared-secret
                   key: POSTGRES_PASSWORD
-            - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
-          ports:
-            - containerPort: 5432
           volumeMounts:
-            - name: postgres-data
+            - name: pgdata
               mountPath: /var/lib/postgresql/data
-            - name: init-users
-              mountPath: /docker-entrypoint-initdb.d/1-users.sql
-              subPath: 1-users.sql
-            - name: init-learn
-              mountPath: /docker-entrypoint-initdb.d/2-learn.sql
-              subPath: 2-learn.sql
+            - name: init-scripts
+              mountPath: /docker-entrypoint-initdb.d
       volumes:
-        - name: postgres-data
+        - name: pgdata
           persistentVolumeClaim:
-            claimName: postgres-pvc
-        - name: init-users
+            claimName: pgdata-pvc
+        - name: init-scripts
           configMap:
-            name: postgres-init-users
-        - name: init-learn
-          configMap:
-            name: postgres-init-learn
+            name: postgres-init-scripts
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres-local
+  name: postgres
 spec:
+  type: ClusterIP
+  selector:
+    app: postgres
   ports:
     - port: 5432
       targetPort: 5432
-  selector:
-    app: postgres-local
+      name: postgres

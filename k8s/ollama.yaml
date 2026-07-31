@@ -1,7 +1,20 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-models-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ollama
+  labels:
+    app: ollama
 spec:
   replicas: 1
   selector:
@@ -13,28 +26,27 @@ spec:
         app: ollama
     spec:
       containers:
-      - name: ollama
-        image: ollama/ollama:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 11434
-        volumeMounts:
-        - name: ollama-models
-          mountPath: /root/.ollama/models
+        - name: ollama
+          image: ollama/ollama:latest
+          ports:
+            - containerPort: 11434
+          volumeMounts:
+            - name: models
+              mountPath: /root/.ollama/models
       volumes:
-      - name: ollama-models
-        hostPath:
-          path: /opt/ollama/models
-          type: DirectoryOrCreate
+        - name: models
+          persistentVolumeClaim:
+            claimName: ollama-models-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: ollama
 spec:
+  type: ClusterIP
   selector:
     app: ollama
   ports:
-    - protocol: TCP
-      port: 11434
+    - port: 11434
       targetPort: 11434
+      name: http

@@ -13,20 +13,15 @@ spec:
         app: redis-sm
     spec:
       containers:
-        - name: redis-sm
+        - name: redis
           image: redis:alpine
+          command: ["redis-server", "--requirepass", "$(REDIS_SM_PASSWORD)", "--loglevel", "warning"]
           env:
-            - name: REDIS_PASS
+            - name: REDIS_SM_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: enbooster-secrets
+                  name: shared-secret
                   key: REDIS_SM_PASSWORD
-          args:
-            - redis-server
-            - "--requirepass"
-            - "$(REDIS_PASS)"
-            - "--loglevel"
-            - "warning"
           ports:
             - containerPort: 6379
 ---
@@ -35,6 +30,7 @@ kind: Service
 metadata:
   name: redis-sm
 spec:
+  type: ClusterIP
   selector:
     app: redis-sm
   ports:
@@ -57,20 +53,15 @@ spec:
         app: redis-lrn
     spec:
       containers:
-        - name: redis-lrn
+        - name: redis
           image: redis:alpine
+          command: ["redis-server", "--requirepass", "$(REDIS_LRN_PASSWORD)", "--loglevel", "warning"]
           env:
-            - name: REDIS_PASS
+            - name: REDIS_LRN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: enbooster-secrets
+                  name: shared-secret
                   key: REDIS_LRN_PASSWORD
-          args:
-            - redis-server
-            - "--requirepass"
-            - "$(REDIS_PASS)"
-            - "--loglevel"
-            - "warning"
           ports:
             - containerPort: 6379
 ---
@@ -79,6 +70,7 @@ kind: Service
 metadata:
   name: redis-lrn
 spec:
+  type: ClusterIP
   selector:
     app: redis-lrn
   ports:
@@ -101,20 +93,15 @@ spec:
         app: redis-rl
     spec:
       containers:
-        - name: redis-rl
+        - name: redis
           image: redis:alpine
+          command: ["redis-server", "--requirepass", "$(REDIS_RL_PASSWORD)", "--loglevel", "warning"]
           env:
-            - name: REDIS_PASS
+            - name: REDIS_RL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: enbooster-secrets
+                  name: shared-secret
                   key: REDIS_RL_PASSWORD
-          args:
-            - redis-server
-            - "--requirepass"
-            - "$(REDIS_PASS)"
-            - "--loglevel"
-            - "warning"
           ports:
             - containerPort: 6379
 ---
@@ -123,6 +110,7 @@ kind: Service
 metadata:
   name: redis-rl
 spec:
+  type: ClusterIP
   selector:
     app: redis-rl
   ports:
@@ -145,20 +133,15 @@ spec:
         app: redis-ai
     spec:
       containers:
-        - name: redis-ai
+        - name: redis
           image: redis:alpine
+          command: ["redis-server", "--requirepass", "$(REDIS_AI_PASSWORD)", "--loglevel", "warning"]
           env:
-            - name: REDIS_PASS
+            - name: REDIS_AI_PASSWORD
               valueFrom:
-                configMapKeyRef:
-                  name: aisrv-config
+                secretKeyRef:
+                  name: shared-secret
                   key: REDIS_AI_PASSWORD
-          args:
-            - redis-server
-            - "--requirepass"
-            - "$(REDIS_PASS)"
-            - "--loglevel"
-            - "warning"
           ports:
             - containerPort: 6379
 ---
@@ -167,6 +150,7 @@ kind: Service
 metadata:
   name: redis-ai
 spec:
+  type: ClusterIP
   selector:
     app: redis-ai
   ports:
