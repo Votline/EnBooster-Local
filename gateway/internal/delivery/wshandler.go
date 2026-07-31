@@ -204,8 +204,11 @@ func (h *WSHandler) handleMessage(reqTrace string, src chatMsg, buf *string, auB
 		zap.Int("msg_len", len(msg)))
 
 	switch msg {
-	case "start":
-		*buf = "Hello"
+	case "/start":
+		if err := h.sm.SetUserCtx(stm.StateNone, nil); err != nil {
+			return fmt.Errorf("%s: unexpected error: %w", op, err)
+		}
+		*buf = "Hello!"
 	case "learning":
 		if err := h.learningTask(buf, uctx, reqTrace); err != nil {
 			return fmt.Errorf("%s: unexpected error: %w", op, err)
