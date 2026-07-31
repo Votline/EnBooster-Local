@@ -21,7 +21,7 @@ defineProps({
     <div class="message-wrapper" :class="{ 'is-me': isMe }">
         <div class="message-bubble">
             <AudioMessage v-if="audioData" :audio-data="audioData" />
-            <span v-if="text">{{ text }}</span>
+            <div v-if="text" class="message-text">{{ text }}</div>
         </div>
     </div>
 </template>
@@ -49,6 +49,10 @@ defineProps({
     background-color: #262729;
     color: #ffffff;
     border-bottom-left-radius: 4px;
+}
+
+.message-text {
+    white-space: pre-wrap;
 }
 
 .is-me .message-bubble {

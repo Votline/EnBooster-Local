@@ -27,7 +27,6 @@ onMounted(() => {
       try {
         const data = JSON.parse(event.data)
 
-        // Смотрим на флаг is_me из Go (или дефолтим в false)
         const isMyMessage = Boolean(data.is_me)
 
         const botMsg = data.req_trace 
@@ -42,7 +41,7 @@ onMounted(() => {
                 req_trace: data.req_trace,
                 text: data.text,
                 audioData: data.ogg_bytes || null,
-                isMe: isMyMessage // Берём реальное значение с бэка!
+                isMe: isMyMessage
             })
         }
         scrollToBottom()
