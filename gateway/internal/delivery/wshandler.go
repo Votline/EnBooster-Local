@@ -4,6 +4,7 @@ package delivery
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -38,6 +39,7 @@ type chatMsg struct {
 	Text     string `json:"text,omitempty"`
 	ReqTrace string `json:"req_trace,omitempty"`
 	OGGBytes []byte `json:"ogg_bytes,omitempty"`
+	IsMe     bool   `json:"is_me"`
 }
 
 // tasksPool used for getting tasks
@@ -75,8 +77,9 @@ func NewWSH(log *zap.Logger) (*WSHandler, error) {
 	aitimeout := time.Duration(GetEnvInt("AI_TIMEOUT", 30)) * time.Second
 	statettl := time.Duration(GetEnvInt("STATE_TTL", 30)) * time.Minute
 	pingtimeout := time.Duration(GetEnvInt("PING_TIMEOUT", 10)) * time.Second
+	historyttl := time.Duration(GetEnvInt("HISTORY_TTL", 60)) * time.Minute
 
-	stmngr, err := stm.NewSM(ctxtimeout, statettl, pingtimeout)
+	stmngr, err := stm.NewSM(ctxtimeout, historyttl, statettl, pingtimeout)
 	if err != nil {
 		return nil, fmt.Errorf("%s: create stm: %w", op, err)
 	}
@@ -136,6 +139,10 @@ func (h *WSHandler) HandleChatWS(w http.ResponseWriter, r *http.Request) {
 
 	h.log.Info("Frontend successfully connceted", zap.String("op", op))
 
+	if err := h.loadHistory(); err != nil {
+		h.log.Error("failed to load history", zap.String("op", op), zap.Error(err))
+	}
+
 	var answer string
 	for {
 		msg := chatMsg{}
@@ -146,6 +153,9 @@ func (h *WSHandler) HandleChatWS(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
+		msg.IsMe = true
+		h.saveMessage(msg)
+
 		h.log.Info("Accepted message",
 			zap.String("text", msg.Text),
 			zap.String("op", op))
@@ -153,7 +163,6 @@ func (h *WSHandler) HandleChatWS(w http.ResponseWriter, r *http.Request) {
 		answer = ""
 		audioAnswer := audioPool.Get().(*bytes.Buffer)
 		audioAnswer.Reset()
-		defer audioPool.Put(audioAnswer)
 
 		reqTrace := uuid.NewString()
 		if err := h.handleMessage(reqTrace, msg, &answer, audioAnswer); err != nil {
@@ -169,13 +178,19 @@ func (h *WSHandler) HandleChatWS(w http.ResponseWriter, r *http.Request) {
 			reply = chatMsg{
 				Text:     answer,
 				ReqTrace: reqTrace,
+				IsMe:     false,
 			}
 		} else {
 			reply = chatMsg{
 				ReqTrace: reqTrace,
 				OGGBytes: audioAnswer.Bytes(),
+				IsMe:     false,
 			}
 		}
+
+		audioPool.Put(audioAnswer)
+
+		h.saveMessage(reply)
 
 		if err := conn.WriteJSON(reply); err != nil {
 			h.log.Error("WS write failed",
@@ -394,4 +409,56 @@ func (h *WSHandler) profile(buf *string, reqTrace string) error {
 		zap.String("reqTrace", reqTrace))
 
 	return nil
+}
+
+// loadHistory get messages from redis and
+// push it to frontend
+func (h *WSHandler) loadHistory() error {
+	const op = "delivery.loadHistory"
+
+	h.log.Info("Loading history...",
+		zap.String("op", op))
+
+	err := h.sm.GetHistory(func(raw []byte) bool {
+		var histMsg chatMsg
+		if err := json.Unmarshal(raw, &histMsg); err != nil {
+			h.log.Error("failed to unmarshal history msg", zap.Error(err))
+			return true
+		}
+
+		if err := h.conn.WriteJSON(histMsg); err != nil {
+			h.log.Error("failed to send history msg to WS", zap.Error(err))
+			return false
+		}
+		return true
+	})
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	h.log.Info("Successfully loaded history",
+		zap.String("op", op))
+
+	return nil
+}
+
+// saveMessage insert new message to redis
+func (h *WSHandler) saveMessage(msg chatMsg) {
+	const op = "delivery.saveMessage"
+
+	h.log.Info("Saving message...",
+		zap.String("op", op))
+
+	bytes, err := json.Marshal(msg)
+	if err != nil {
+		h.log.Error("failed to marshal msg for history", zap.Error(err))
+		return
+	}
+
+	if err := h.sm.AddMessage(bytes); err != nil {
+		h.log.Error("failed to save msg to history", zap.Error(err))
+	}
+
+	h.log.Info("Successfully saved message",
+		zap.String("op", op))
 }
