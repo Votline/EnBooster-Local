@@ -13,7 +13,7 @@ import (
 
 	"users/internal/db"
 
-	pb "github.com/Votline/EnBooster/protos/generated-users"
+	pb "github.com/Votline/EnBooster-Local/protos/generated-users"
 	"github.com/segmentio/kafka-go"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -151,8 +151,8 @@ func (s *usersserver) UpdLangLevel(ctx context.Context, req *pb.UpdLangLevelReq)
 	const op = "usersserver.UpdLangLevel"
 
 	var uuid int64 = 1
-	reqTrace := req.GetRequestTrace()
 	level := req.GetLevel()
+	reqTrace := req.GetRequestTrace()
 
 	s.log.Debug("UpdLangLevel request",
 		zap.Int64("uuid", uuid),
