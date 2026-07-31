@@ -37,6 +37,7 @@ const (
 type StateManager struct {
 	rdb        *redis.Client
 	ctxTimeout time.Duration
+	historyTTL time.Duration
 	stateTTL   time.Duration
 }
 
@@ -58,6 +59,7 @@ type ShiritoriSession struct {
 	UserCorrectWords uint            `json:"user_correct_words"`
 }
 
+// ChattingSession used for AI chatting
 type ChattingSession struct {
 	SystemPrompt string `json:"system_prompt"`
 	LastMessage  string `json:"last_message"`
@@ -70,7 +72,7 @@ type UserContext struct {
 }
 
 // NewSM connects to redis and returns a new StateManager
-func NewSM(ctxTimeout time.Duration, stateTTL, pingTimeout time.Duration) (*StateManager, error) {
+func NewSM(ctxTimeout, historyTTL, stateTTL, pingTimeout time.Duration) (*StateManager, error) {
 	const op = "statemanager.NewSM"
 
 	rdb := redis.NewClient(&redis.Options{
@@ -90,6 +92,7 @@ func NewSM(ctxTimeout time.Duration, stateTTL, pingTimeout time.Duration) (*Stat
 		rdb:        rdb,
 		ctxTimeout: ctxTimeout,
 		stateTTL:   stateTTL,
+		historyTTL: historyTTL,
 	}, nil
 }
 
@@ -225,6 +228,51 @@ func (sm *StateManager) UpdateUserDataCtx(jsonData []byte) error {
 
 	if res == 0 {
 		return fmt.Errorf("%s: user data was not updated", op)
+	}
+
+	return nil
+}
+
+// AddMessage saved message to history
+func (sm *StateManager) AddMessage(jsonData []byte) error {
+	const op = "statemanager.AddMessage"
+
+	ctx, cancel := context.WithTimeout(context.Background(), sm.ctxTimeout)
+	defer cancel()
+
+	key := "chat:history:1"
+
+	pipe := sm.rdb.Pipeline()
+	pipe.RPush(ctx, key, jsonData)
+	pipe.Expire(ctx, key, sm.historyTTL)
+
+	pipe.LTrim(ctx, key, -100, -1)
+
+	if _, err := pipe.Exec(ctx); err != nil {
+		return fmt.Errorf("%s: redis pipeline exec: %w", op, err)
+	}
+
+	return nil
+}
+
+// GetHistory get all messages from history
+func (sm *StateManager) GetHistory(yield func(raw []byte) bool) error {
+	const op = "statemanager.GetHistory"
+
+	ctx, cancel := context.WithTimeout(context.Background(), sm.ctxTimeout)
+	defer cancel()
+
+	key := "chat:history:1"
+
+	rawMsgs, err := sm.rdb.LRange(ctx, key, 0, -1).Result()
+	if err != nil {
+		return fmt.Errorf("%s: lrange error: %w", op, err)
+	}
+
+	for _, raw := range rawMsgs {
+		if !yield([]byte(raw)) {
+			break
+		}
 	}
 
 	return nil

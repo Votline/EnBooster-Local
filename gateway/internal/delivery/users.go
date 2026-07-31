@@ -220,6 +220,7 @@ func (h *WSHandler) handleUser(buf *string, auBuf *bytes.Buffer, uctx stm.UserCo
 		h.conn.WriteJSON(chatMsg{
 			Text:     "AI is generating text...",
 			ReqTrace: reqTrace,
+			IsMe:     false,
 		})
 
 		resBuf := aiTextPool.Get().(*bytes.Buffer)
@@ -231,6 +232,7 @@ func (h *WSHandler) handleUser(buf *string, auBuf *bytes.Buffer, uctx stm.UserCo
 			h.conn.WriteJSON(chatMsg{
 				Text:     resBuf.String(),
 				ReqTrace: reqTrace,
+				IsMe:     false,
 			})
 		}); err != nil {
 			return fmt.Errorf("%s: generate text: %w", op, err)
@@ -246,6 +248,7 @@ func (h *WSHandler) handleUser(buf *string, auBuf *bytes.Buffer, uctx stm.UserCo
 		h.conn.WriteJSON(chatMsg{
 			Text:     "AI is recognizing audio...",
 			ReqTrace: reqTrace,
+			IsMe:     false,
 		})
 
 		fullText := ""
@@ -254,6 +257,7 @@ func (h *WSHandler) handleUser(buf *string, auBuf *bytes.Buffer, uctx stm.UserCo
 			h.conn.WriteJSON(chatMsg{
 				Text:     fullText,
 				ReqTrace: reqTrace,
+				IsMe:     false,
 			})
 		}); err != nil {
 			return fmt.Errorf("%s: state stt: %w", op, err)
@@ -264,6 +268,7 @@ func (h *WSHandler) handleUser(buf *string, auBuf *bytes.Buffer, uctx stm.UserCo
 		h.conn.WriteJSON(chatMsg{
 			Text:     "AI is recognizing audio...",
 			ReqTrace: reqTrace,
+			IsMe:     false,
 		})
 
 		if err := h.handleVoice(src.OGGBytes, reqTrace, func(text string) {
@@ -364,6 +369,7 @@ func (h *WSHandler) handleTTS(uctx stm.UserContext, auBuf *bytes.Buffer, usrMsg,
 	h.conn.WriteJSON(chatMsg{
 		Text:     "AI is generating text...",
 		ReqTrace: reqTrace,
+		IsMe:     false,
 	})
 
 	if err := h.generateText(uctx, usrMsg, reqTrace, func(text string) {
@@ -378,6 +384,7 @@ func (h *WSHandler) handleTTS(uctx stm.UserContext, auBuf *bytes.Buffer, usrMsg,
 	h.conn.WriteJSON(chatMsg{
 		Text:     "Successfully generated text. AI is generating audio...",
 		ReqTrace: reqTrace,
+		IsMe:     false,
 	})
 
 	if err := h.aisrv.GenerateAudio(generatedText, reqTrace, func(audio []byte) {
@@ -389,6 +396,7 @@ func (h *WSHandler) handleTTS(uctx stm.UserContext, auBuf *bytes.Buffer, usrMsg,
 	h.conn.WriteJSON(chatMsg{
 		OGGBytes: auBuf.Bytes(),
 		ReqTrace: reqTrace,
+		IsMe:     false,
 	})
 
 	return nil

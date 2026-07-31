@@ -24,29 +24,31 @@ onMounted(() => {
     }
 
     socket.onmessage = (event) => {
-        try {
-            const data = JSON.parse(event.data)
+      try {
+        const data = JSON.parse(event.data)
 
-            const botMsg = data.req_trace 
-                ? messages.value.find(m => m.req_trace === data.req_trace && !m.isMe)
-                : null
+        const isMyMessage = Boolean(data.is_me)
 
-            if (botMsg) {
-                botMsg.text = data.text
-                if (data.ogg_bytes) botMsg.audioData = data.ogg_bytes
-            } else {
-                messages.value.push({
-                    req_trace: data.req_trace,
-                    text: data.text,
-                    audioData: data.ogg_bytes || null,
-                    isMe: false
-                })
-            }
-            scrollToBottom()
-        } catch (err) {
-            console.error('Ошибка парсинга JSON:', err)
+        const botMsg = data.req_trace 
+            ? messages.value.find(m => m.req_trace === data.req_trace && !m.isMe)
+            : null
+
+        if (botMsg) {
+            botMsg.text = data.text
+            if (data.ogg_bytes) botMsg.audioData = data.ogg_bytes
+        } else {
+            messages.value.push({
+                req_trace: data.req_trace,
+                text: data.text,
+                audioData: data.ogg_bytes || null,
+                isMe: isMyMessage
+            })
         }
+        scrollToBottom()
+    } catch (err) {
+        console.error('Ошибка парсинга JSON:', err)
     }
+}
 
     socket.onerror = (err) => {
         console.error('🔴 Ошибка WS:', err)
