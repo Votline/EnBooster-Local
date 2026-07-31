@@ -285,6 +285,11 @@ func (h *WSHandler) handleUser(buf *string, auBuf *bytes.Buffer, uctx stm.UserCo
 			return fmt.Errorf("%s: state setlanglevel: %w", op, err)
 		}
 		*buf = "Successfully changed level to " + upper
+	case stm.StateSetSysPrompt:
+		if err := h.usrsrv.UpdSystemPrompt(src.Text, reqTrace); err != nil {
+			return fmt.Errorf("%s: state setsysprompt: %w", op, err)
+		}
+		*buf = "Successfully changed prompt"
 	default:
 		*buf = "no handled"
 	}

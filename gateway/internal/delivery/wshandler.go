@@ -213,6 +213,9 @@ func (h *WSHandler) handleMessage(reqTrace string, src chatMsg, buf *string, auB
 		*buf = "Write new english level." +
 			"Supported: A1, A2, B1, B2, C1, C2"
 		err = h.sm.UpdUserStateCtx(stm.StateSetLangLevel)
+	case "changeprompt":
+		*buf = "Write your system prompt"
+		err = h.sm.UpdUserStateCtx(stm.StateSetSysPrompt)
 	case "learning":
 		err = h.learning(buf, uctx, reqTrace)
 	case "shiritori":
