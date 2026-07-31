@@ -70,12 +70,11 @@ func (us *UsersService) GetData(reqTrace string) (UserData, error) {
 }
 
 // UpdSystemPrompt updates user system prompt
-func (us *UsersService) UpdSystemPrompt(uuid int64, sp, reqTrace string) error {
+func (us *UsersService) UpdSystemPrompt(sp, reqTrace string) error {
 	const op = "users.UpdSystemPrompt"
 
 	us.log.Debug("Update system prompt request",
 		zap.String("op", op),
-		zap.Int64("uuid", uuid),
 		zap.Int("system_prompt_len", len(sp)),
 		zap.String("reqTrace", reqTrace))
 
@@ -91,7 +90,6 @@ func (us *UsersService) UpdSystemPrompt(uuid int64, sp, reqTrace string) error {
 
 	us.log.Debug("Update system prompt successfully",
 		zap.String("op", op),
-		zap.Int64("uuid", uuid),
 		zap.String("reqTrace", reqTrace))
 
 	return nil
