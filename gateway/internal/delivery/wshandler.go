@@ -209,6 +209,10 @@ func (h *WSHandler) handleMessage(reqTrace string, src chatMsg, buf *string, auB
 			return fmt.Errorf("%s: unexpected error: %w", op, err)
 		}
 		*buf = "Hello!"
+	case "profile":
+		if err := h.profile(buf, reqTrace); err != nil {
+			return fmt.Errorf("%s: unexpected error: %w", op, err)
+		}
 	case "learning":
 		if err := h.learningTask(buf, uctx, reqTrace); err != nil {
 			return fmt.Errorf("%s: unexpected error: %w", op, err)
@@ -255,7 +259,7 @@ func (h *WSHandler) handleDefault(buf *string, auBuf *bytes.Buffer, uctx stm.Use
 		*buf = "Unknown command or state"
 	}
 
-	h.log.Info("Successfully handled message",
+	h.log.Info("Successfully handled default",
 		zap.String("op", op),
 		zap.String("reqTrace", reqTrace))
 
@@ -309,7 +313,7 @@ func (h *WSHandler) learningTask(buf *string, uctx stm.UserContext, reqTrace str
 		return fmt.Errorf("%s: update state: %w", op, err)
 	}
 
-	h.log.Info("Successfully handled message",
+	h.log.Info("Successfully handled learning",
 		zap.String("op", op),
 		zap.String("reqTrace", reqTrace))
 
@@ -330,7 +334,7 @@ func (h *WSHandler) shiritori(buf *string, reqTrace string) error {
 	}
 	*buf = "Shiritori mode activated. Write any word"
 
-	h.log.Info("Successfully handled message",
+	h.log.Info("Successfully handled shiritori",
 		zap.String("op", op),
 		zap.String("reqTrace", reqTrace))
 
@@ -355,7 +359,38 @@ func (h *WSHandler) chatting(buf *string, reqTrace string) error {
 		"stt: speech to text\n" +
 		"sts: speech to speech\n"
 
-	h.log.Info("Successfully handled message",
+	h.log.Info("Successfully handled chatting",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace))
+
+	return nil
+}
+
+// profile call users-service handler get data and
+// write it to buffer
+func (h *WSHandler) profile(buf *string, reqTrace string) error {
+	const op = "delivery.profile"
+
+	h.log.Info("handle chatting",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace))
+
+	ud, err := h.usrsrv.GetData(reqTrace)
+	if err != nil {
+		return fmt.Errorf("%s: get data: %w", op, err)
+	}
+
+	*buf = fmt.Sprintf(
+		"Your data:\n"+
+			"Level: %s\n"+
+			"Task position:%d\n"+
+			"Best theme: %s | %d\n"+
+			"Worst theme: %s | %d\n"+
+			"Streak: %d\nSystem prompt: %s",
+		ud.Level, ud.TaskID, ud.BestTheme, ud.BestThemeCnt,
+		ud.WorstTheme, ud.WorstThemeCnt, ud.Streak, ud.SystemPrompt)
+
+	h.log.Info("Successfully handled profile",
 		zap.String("op", op),
 		zap.String("reqTrace", reqTrace))
 
