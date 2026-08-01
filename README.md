@@ -101,23 +101,41 @@ Instead of relying on external paid APIs, the platform implements a fully local,
 
 The infrastructure is optimized for local environments but remains fully containerized.
 
-### Kubernetes (`k8s/`)
+### ⚙️ 1. Prerequisites & Model Setup
 
-The repository contains full Kubernetes manifests for deploying the system into a local cluster (e.g., Minikube, K3s):
+Before starting the stack, you must configure your local AI dependencies:
 
-* **Persistent Volume Claims (PVC)**: Used for PostgreSQL data retention and Ollama model weights.
-* **Service Discovery**: Internal routing handled via Kubernetes ClusterIP services for seamless, insecure gRPC communication.
+* **Voice Models:** Download and place your Vosk model and the RHVoice script directly into the `ai-service/scripts` directory.
+* **LLM (Ollama):** Ensure you have the required Ollama model downloaded to your host machine.
+* **Configure Paths:** Open `docker-compose.yml` and modify the host path for the Ollama volume to match where your models are stored locally (replace `/opt/ollama/models` with your actual path):
+```yaml
+ollama:
+  image: ollama/ollama:latest
+  restart: unless-stopped
+  volumes:
+    - /YOUR/LOCAL/PATH/TO/MODELS:/root/.ollama/models
+  ports:
+    - "${OLLAMA_PORT_OUT}:${OLLAMA_PORT}"
 
-### Docker Compose Local Setup
+```
 
-Create an `.env` file matching the provided example, then spin up the entire offline stack (Vue.js frontend, PostgreSQL, Redis instances, Ollama, and Go microservices) using:
+* **Set Model Name:** Open `ai-service/.env_vars` and update the `AI_MODEL` variable to match the exact name of the Ollama model you want to use.
+
+### 📦 2. Docker Compose Local Setup
 
 ```bash
 docker compose up --build -d
 
 ```
 
-*PostgreSQL automatically applies `init.sql` schema files on the first boot. The application will be immediately available at `localhost:8080` via the Gateway.*
+PostgreSQL automatically applies `init.sql` schema files on the first boot. The application will be immediately available at `localhost:5173` via the Gateway.
+
+### ☸️ 3. Kubernetes (k8s/)
+
+The repository contains full Kubernetes manifests for deploying the system into a local cluster (e.g., Minikube, K3s):
+
+* **Persistent Volume Claims (PVC):** Used for PostgreSQL data retention and Ollama model weights.
+* **Service Discovery:** Internal routing is handled via Kubernetes ClusterIP services for seamless, insecure gRPC communication.
 
 ---
 
