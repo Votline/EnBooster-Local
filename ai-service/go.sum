@@ -1,5 +1,7 @@
 github.com/Votline/EnBooster-Local/protos v0.0.3 h1:3dMMG80MfiV5zP0sSJeWoNDQwWYqguPCLDXNoPVtl2Q=
 github.com/Votline/EnBooster-Local/protos v0.0.3/go.mod h1:Tok4QByeEzwhW6tQYsMSGiv3gn3f8Q8fxzElcZ2hh84=
+github.com/Votline/EnBooster-Local/protos v0.0.4 h1:IGymx+y94WkFCAli7GeSYazqSAGK7me52qZzp4AOKEk=
+github.com/Votline/EnBooster-Local/protos v0.0.4/go.mod h1:Tok4QByeEzwhW6tQYsMSGiv3gn3f8Q8fxzElcZ2hh84=
 github.com/Votline/EnBooster/protos v1.0.9 h1:yX4HkfKgaar6rj8kCsG5N2aQoaZXxyE/yBdpVSsiEyM=
 github.com/Votline/EnBooster/protos v1.0.9/go.mod h1:SEdrv6X/Gj/3ghZkiCxRAvIwR0diDo3rj5c4Dd1JX4I=
 github.com/Votline/EnBooster/protos v1.1.0 h1:Mt2e2MK2vj8+3xmjJMPA/ALQ619fqYhpAjCegXHDab4=

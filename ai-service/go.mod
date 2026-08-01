@@ -10,7 +10,7 @@ require (
 )
 
 require (
-	github.com/Votline/EnBooster-Local/protos v0.0.3 // indirect
+	github.com/Votline/EnBooster-Local/protos v0.0.4 // indirect
 	github.com/alphacep/vosk-api/go v0.3.50 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect

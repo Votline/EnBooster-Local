@@ -82,6 +82,7 @@ const helpMsg = `AVAILABLE COMMANDS:
 • chatting     - Free chat with AI
 • changelevel  - Change target English level (A1-C2)
 • changeprompt - Customize AI system prompt
+• clearcontext - Clear current AI context
 • /start       - Reset current state & data
 • help         - Show this menu
 
@@ -286,6 +287,9 @@ func (h *WSHandler) handleMessage(reqTrace string, src chatMsg, buf *string, auB
 	case "changeprompt":
 		*buf = "Write your system prompt"
 		err = h.sm.UpdUserStateCtx(stm.StateSetSysPrompt)
+	case "clearcontext":
+		*buf = "Context successfully cleared"
+		err = h.aisrv.ClearAIContext(reqTrace)
 	case "learning":
 		err = h.learning(buf, uctx, reqTrace)
 	case "shiritori":

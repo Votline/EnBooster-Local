@@ -241,7 +241,7 @@ func (s *aiserver) RecognizeAudio(req *pb.RecognizeAudioReq, stream pb.AIService
 func (s *aiserver) ClearAIContext(ctx context.Context, req *pb.ClearAIContextReq) (*pb.ClearAIContextRes, error) {
 	const op = "aiserver.ClearAIContext"
 
-	uuid := req.GetUuid()
+	var uuid int64 = 1
 	reqTrace := req.GetRequestTrace()
 
 	s.log.Debug("Clear AI context request received",
