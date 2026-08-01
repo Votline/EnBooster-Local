@@ -171,3 +171,31 @@ func (s *usersserver) UpdLangLevel(ctx context.Context, req *pb.UpdLangLevelReq)
 
 	return &pb.UpdLangLevelRes{}, nil
 }
+
+// UpdStreak updates user streak
+func (s *usersserver) UpdStreak(ctx context.Context, req *pb.UpdStreakReq) (*pb.UpdStreakRes, error) {
+	const op = "usersserver.UpdStreak"
+
+	var uuid int64 = 1
+	correct := req.GetCorrect()
+	theme := req.GetTheme()
+	counter := req.GetCounter()
+	reqTrace := req.GetRequestTrace()
+
+	s.log.Debug("UpdStreak request",
+		zap.Bool("correct", correct),
+		zap.String("theme", theme),
+		zap.String("request_trace", reqTrace),
+		zap.String("op", op))
+
+	if err := s.db.UpdateStreak(uuid, ctx, reqTrace, correct, theme, counter); err != nil {
+		return nil, fmt.Errorf("%s: db update streak: %w", op, err)
+	}
+
+	s.log.Debug("Successfully updated streak",
+		zap.Int64("uuid", uuid),
+		zap.String("request_trace", reqTrace),
+		zap.String("op", op))
+
+	return &pb.UpdStreakRes{}, nil
+}
