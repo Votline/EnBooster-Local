@@ -26,6 +26,7 @@ type UserData struct {
 	TaskID        int32  `json:"task_id"`
 	Streak        int32  `json:"streak"`
 	SystemPrompt  string `json:"system_prompt"`
+	LastDoneDay   int64  `json:"last_done_day"`
 }
 
 // UserAnswer used to push user answer to kafka
