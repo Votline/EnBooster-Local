@@ -4,10 +4,13 @@ package ai
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"unsafe"
+
+	stm "gateway/internal/statemanager"
 
 	pb "github.com/Votline/EnBooster-Local/protos/generated-ai"
 	"go.uber.org/zap"
@@ -158,6 +161,31 @@ func (ai *AIService) ClearAIContext(reqTrace string) error {
 	ai.log.Debug("Clear ai context successfully",
 		zap.String("op", op),
 		zap.String("reqTrace", reqTrace))
+
+	return nil
+}
+
+// GetLastMessage unmarhsal user data to ChattingSession and
+// rewrite buffer to last message
+func (ai *AIService) GetLastMessage(buf *string, uctx stm.UserContext, reqTrace string) error {
+	const op = "ai.GetLastMessage"
+
+	ai.log.Debug("Get last message",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace))
+
+	var chatSes stm.ChattingSession
+	if uctx.JSONData != "" {
+		uctxData := unsafe.Slice(unsafe.StringData(uctx.JSONData), len(uctx.JSONData))
+		if err := json.Unmarshal(uctxData, &chatSes); err != nil {
+			return fmt.Errorf("%s: unmarhsal: %w", op, err)
+		}
+	}
+
+	*buf = chatSes.LastMessage
+	if chatSes.LastMessage == "" {
+		*buf = "No transcription found"
+	}
 
 	return nil
 }

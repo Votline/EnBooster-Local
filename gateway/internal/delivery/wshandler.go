@@ -83,6 +83,7 @@ const helpMsg = `AVAILABLE COMMANDS:
 • changelevel  - Change target English level (A1-C2)
 • changeprompt - Customize AI system prompt
 • clearcontext - Clear current AI context
+• transcript   - Get transcription for last audio message
 • /start       - Reset current state & data
 • help         - Show this menu
 
@@ -290,6 +291,8 @@ func (h *WSHandler) handleMessage(reqTrace string, src chatMsg, buf *string, auB
 	case "clearcontext":
 		*buf = "Context successfully cleared"
 		err = h.aisrv.ClearAIContext(reqTrace)
+	case "transcript":
+		err = h.aisrv.GetLastMessage(buf, uctx, reqTrace)
 	case "learning":
 		err = h.learning(buf, uctx, reqTrace)
 	case "shiritori":
