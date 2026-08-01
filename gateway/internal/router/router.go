@@ -2,6 +2,7 @@
 package router
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -17,9 +18,9 @@ type Server struct {
 	wsh *delivery.WSHandler
 }
 
-func Setup(log *zap.Logger) (*Server, error) {
+func Setup(log *zap.Logger, ctx context.Context) (*Server, error) {
 	const op = "router.Setup"
-	wsh, err := delivery.NewWSH(log)
+	wsh, err := delivery.NewWSH(log, ctx)
 	if err != nil {
 		return nil, fmt.Errorf("%s: create ws handler:%w", op, err)
 	}
@@ -41,5 +42,17 @@ func (s *Server) Start() error {
 	if err := s.srv.ListenAndServe(); err != nil {
 		return fmt.Errorf("%s: listen and serve: %w", op, err)
 	}
+	return nil
+}
+
+func (s *Server) Close() error {
+	const op = "router.Close"
+
+	s.srv.Close()
+
+	if err := s.wsh.Close(); err != nil {
+		return fmt.Errorf("%s: wsh close: %w", op, err)
+	}
+
 	return nil
 }

@@ -20,7 +20,7 @@ import (
 type UsersService struct {
 	name       string
 	langLevels map[string]struct{}
-	notifyMsgs []string
+	NotifyMsgs []string
 	sm         *statemanager.StateManager
 	ctxTimeout time.Duration
 	log        *zap.Logger
@@ -57,7 +57,7 @@ func NewUS(ctxTimeout time.Duration, sm *statemanager.StateManager, log *zap.Log
 	srv := &UsersService{
 		name:       "users",
 		langLevels: langLevels,
-		notifyMsgs: notifyMsgs,
+		NotifyMsgs: notifyMsgs,
 		sm:         sm,
 		ctxTimeout: ctxTimeout,
 		log:        log,

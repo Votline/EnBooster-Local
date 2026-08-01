@@ -4,6 +4,7 @@ package delivery
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -32,6 +33,7 @@ type WSHandler struct {
 	lrnsrv   *learn.LearnService
 	usrsrv   *users.UsersService
 	aisrv    *ai.AIService
+	nsTicker *time.Ticker
 }
 
 // chatMsg used for send/accept message from frontend
@@ -97,7 +99,7 @@ const helpMsg = `AVAILABLE COMMANDS:
   <word> <serial_number>`
 
 // NewWSH creates new WSHandler instance
-func NewWSH(log *zap.Logger) (*WSHandler, error) {
+func NewWSH(log *zap.Logger, ctx context.Context) (*WSHandler, error) {
 	const op = "delivery.NewWSH"
 	ctxtimeout := time.Duration(GetEnvInt("CTX_TIMEOUT", 10)) * time.Second
 	aitimeout := time.Duration(GetEnvInt("AI_TIMEOUT", 30)) * time.Second
@@ -129,18 +131,43 @@ func NewWSH(log *zap.Logger) (*WSHandler, error) {
 
 	log.Info("Connected to learn-service", zap.String("op", op))
 
-	return &WSHandler{
+	ticker := time.NewTicker(time.Second)
+	ticker.Stop()
+
+	wsh := &WSHandler{
 		log: log,
 		upgrader: &websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true
 			},
 		},
-		sm:     stmngr,
-		lrnsrv: lrnsrv,
-		usrsrv: usrsrv,
-		aisrv:  aisrv,
-	}, nil
+		sm:       stmngr,
+		lrnsrv:   lrnsrv,
+		usrsrv:   usrsrv,
+		aisrv:    aisrv,
+		nsTicker: ticker,
+	}
+
+	go wsh.Scheduler(ctx)
+
+	return wsh, nil
+}
+
+// Close closes all services
+func (h *WSHandler) Close() error {
+	const op = "delivery.Close"
+
+	if err := h.usrsrv.Close(); err != nil {
+		return fmt.Errorf("%s: usrsrv close: %w", op, err)
+	}
+	if err := h.lrnsrv.Close(); err != nil {
+		return fmt.Errorf("%s: lrnsrv close: %w", op, err)
+	}
+	if err := h.aisrv.Close(); err != nil {
+		return fmt.Errorf("%s: aisrv close: %w", op, err)
+	}
+
+	return nil
 }
 
 // RegisterRoutes register routes for WSHandler
