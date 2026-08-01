@@ -32,6 +32,7 @@ type User struct {
 	WorstThemeCounter int    `db:"worst_theme_counter" json:"worst_theme_counter"`
 	Streak            int32  `db:"streak" json:"streak"`
 	SystemPrompt      string `db:"system_prompt" json:"system_prompt"`
+	LastDoneDone      int64  `db:"last_done_day" json:"last_done_day"`
 }
 
 func GetEnvInt(key string, defaultVal int) int {
@@ -117,7 +118,7 @@ func (d *DB) GetUser(uuid int64, ctx context.Context, reqTrace string) (*User, e
 
 	query, args, err := d.bd.Select(
 		"level", "task_id", "best_theme",
-		"best_theme_counter", "worst_theme",
+		"best_theme_counter", "worst_theme", "last_done_day",
 		"worst_theme_counter", "streak", "system_prompt").
 		From("users").
 		Where(sq.Eq{"uuid": uuid}).
@@ -142,30 +143,6 @@ func (d *DB) GetUser(uuid int64, ctx context.Context, reqTrace string) (*User, e
 		zap.String("op", op))
 
 	return &user, nil
-}
-
-// GetUsersByID get 20 chat_id by 'id' - SERIAL field
-func (d *DB) GetUsersByID(ctx context.Context, id int32, chatBuf *[]int64) error {
-	const op = "db.GetUsersByID"
-
-	currentDay := time.Now().UTC().Unix() / 86400
-
-	query, args, err := d.bd.Select("chat_id").
-		From("users").
-		Where(sq.Gt{"id": id}).
-		Where(sq.Lt{"last_done_day": currentDay}).
-		OrderBy("id ASC").
-		Limit(20).
-		ToSql()
-	if err != nil {
-		return fmt.Errorf("%s: build get query", op)
-	}
-
-	if err := d.db.SelectContext(ctx, chatBuf, query, args...); err != nil {
-		return fmt.Errorf("%s: get users: %w", op, err)
-	}
-
-	return nil
 }
 
 // UpdateStreak atomically updates the streak of a user
