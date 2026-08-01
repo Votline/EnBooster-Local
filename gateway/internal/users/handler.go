@@ -217,3 +217,35 @@ func (us *UsersService) UpdateUserShiritoriCtx(
 
 	return isRepeat, notMatch, nil
 }
+
+func (us *UsersService) UpdStreak(correct bool, theme string, counter int, reqTrace string) error {
+	const op = "users.UpdStreak"
+
+	us.log.Debug("Update streak request",
+		zap.String("op", op),
+		zap.Bool("correct", correct),
+		zap.String("theme", theme),
+		zap.Int("counter", counter),
+		zap.String("reqTrace", reqTrace))
+
+	ctx, cancel := context.WithTimeout(context.Background(), us.ctxTimeout)
+	defer cancel()
+
+	if _, err := us.client.UpdStreak(ctx, &pb.UpdStreakReq{
+		Correct:      correct,
+		Theme:        theme,
+		Counter:      int32(counter),
+		RequestTrace: reqTrace,
+	}); err != nil {
+		return fmt.Errorf("%s: rpc call: %w", op, err)
+	}
+
+	us.log.Debug("Update streak successfully",
+		zap.String("op", op),
+		zap.Bool("correct", correct),
+		zap.String("theme", theme),
+		zap.Int("counter", counter),
+		zap.String("reqTrace", reqTrace))
+
+	return nil
+}

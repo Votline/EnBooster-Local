@@ -22,8 +22,17 @@ message UpdLangLevelReq {
 }
 message UpdLangLevelRes {}
 
+message UpdStreakReq {
+  bool correct  = 1;
+  string theme = 2;
+  int32 counter = 3;
+  string request_trace = 4;
+}
+message UpdStreakRes {}
+
 service UsersService {
   rpc GetUser (GetReq) returns (GetRes);
   rpc UpdSystemPrompt (UpdSystemPromptReq) returns (UpdSystemPromptRes);
   rpc UpdLangLevel (UpdLangLevelReq) returns (UpdLangLevelRes);
+  rpc UpdStreak (UpdStreakReq) returns (UpdStreakRes);
 }

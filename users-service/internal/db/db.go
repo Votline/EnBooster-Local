@@ -169,7 +169,7 @@ func (d *DB) GetUsersByID(ctx context.Context, id int32, chatBuf *[]int64) error
 }
 
 // UpdateStreak atomically updates the streak of a user
-func (d *DB) UpdateStreak(uuid int64, ctx context.Context, reqTrace string, correct bool, theme string, counter int) error {
+func (d *DB) UpdateStreak(uuid int64, ctx context.Context, reqTrace string, correct bool, theme string, counter int32) error {
 	const op = "db.UpdateStreak"
 
 	currentDay := time.Now().UTC().Unix() / 86400

@@ -80,6 +80,13 @@ func (h *WSHandler) handleUser(buf *string, auBuf *bytes.Buffer, uctx stm.UserCo
 				zap.String("reqTrace", reqTrace),
 				zap.Error(err))
 		}
+
+		if err := h.usrsrv.UpdStreak(correct, theme, taskSes.Counter+add, reqTrace); err != nil {
+			h.log.Error("Failed to update streak",
+				zap.String("op", op),
+				zap.String("reqTrace", reqTrace),
+				zap.Error(err))
+		}
 	case stm.StateShiritori:
 		var shirSes stm.ShiritoriSession
 		uctxData := unsafe.Slice(unsafe.StringData(uctx.JSONData), len(uctx.JSONData))
