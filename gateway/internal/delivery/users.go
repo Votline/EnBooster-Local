@@ -51,6 +51,7 @@ func (h *WSHandler) handleUser(buf *string, auBuf *bytes.Buffer, uctx stm.UserCo
 		return nil
 	}
 
+	resetState := false
 	switch uctx.State {
 	case stm.StateTaskLearning:
 		var taskSes stm.TaskSession
@@ -96,6 +97,7 @@ func (h *WSHandler) handleUser(buf *string, auBuf *bytes.Buffer, uctx stm.UserCo
 					zap.Error(err))
 			}
 		}
+		resetState = true
 	case stm.StateShiritori:
 		var shirSes stm.ShiritoriSession
 		uctxData := unsafe.Slice(unsafe.StringData(uctx.JSONData), len(uctx.JSONData))
@@ -306,18 +308,30 @@ func (h *WSHandler) handleUser(buf *string, auBuf *bytes.Buffer, uctx stm.UserCo
 			return fmt.Errorf("%s: state setlanglevel: %w", op, err)
 		}
 		*buf = "Successfully changed level to " + upper
+		resetState = true
 	case stm.StateSetSysPrompt:
 		if err := h.usrsrv.UpdSystemPrompt(src.Text, reqTrace); err != nil {
 			return fmt.Errorf("%s: state setsysprompt: %w", op, err)
 		}
 		*buf = "Successfully changed prompt"
+		resetState = true
 	default:
 		*buf = "no handled"
+		resetState = true
 	}
 
 	h.log.Info("Successfully handled message",
 		zap.String("op", op),
 		zap.String("reqTrace", reqTrace))
+
+	if resetState {
+		if err := h.sm.UpdUserStateCtx(stm.StateNone); err != nil {
+			h.log.Error("Failed to change state",
+				zap.String("op", op),
+				zap.String("reqTrace", reqTrace),
+				zap.Error(err))
+		}
+	}
 
 	return nil
 }
