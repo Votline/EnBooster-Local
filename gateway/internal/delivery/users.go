@@ -87,6 +87,15 @@ func (h *WSHandler) handleUser(buf *string, auBuf *bytes.Buffer, uctx stm.UserCo
 				zap.String("reqTrace", reqTrace),
 				zap.Error(err))
 		}
+
+		if correct {
+			if err := h.usrsrv.UpdTaskID(1, reqTrace); err != nil {
+				h.log.Error("Failed to update task id",
+					zap.String("op", op),
+					zap.String("reqTrace", reqTrace),
+					zap.Error(err))
+			}
+		}
 	case stm.StateShiritori:
 		var shirSes stm.ShiritoriSession
 		uctxData := unsafe.Slice(unsafe.StringData(uctx.JSONData), len(uctx.JSONData))

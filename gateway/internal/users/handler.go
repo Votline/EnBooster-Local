@@ -250,3 +250,28 @@ func (us *UsersService) UpdStreak(correct bool, theme string, counter int, reqTr
 
 	return nil
 }
+
+func (us *UsersService) UpdTaskID(add int, reqTrace string) error {
+	const op = "users.UpdTaskID"
+
+	us.log.Debug("Update task id req",
+		zap.Int("add", add),
+		zap.String("reqTrace", reqTrace),
+		zap.String("op", op))
+
+	ctx, cancel := context.WithTimeout(context.Background(), us.ctxTimeout)
+	defer cancel()
+
+	if _, err := us.client.UpdTaskID(ctx, &pb.UpdTaskIDReq{
+		Add:          int32(add),
+		RequestTrace: reqTrace,
+	}); err != nil {
+		return fmt.Errorf("%s: rpc call: %w", op, err)
+	}
+
+	us.log.Debug("Update task id successfully",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace))
+
+	return nil
+}
