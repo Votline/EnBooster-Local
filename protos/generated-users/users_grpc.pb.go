@@ -23,6 +23,7 @@ const (
 	UsersService_UpdSystemPrompt_FullMethodName = "/users.UsersService/UpdSystemPrompt"
 	UsersService_UpdLangLevel_FullMethodName    = "/users.UsersService/UpdLangLevel"
 	UsersService_UpdStreak_FullMethodName       = "/users.UsersService/UpdStreak"
+	UsersService_UpdTaskID_FullMethodName       = "/users.UsersService/UpdTaskID"
 )
 
 // UsersServiceClient is the client API for UsersService service.
@@ -33,6 +34,7 @@ type UsersServiceClient interface {
 	UpdSystemPrompt(ctx context.Context, in *UpdSystemPromptReq, opts ...grpc.CallOption) (*UpdSystemPromptRes, error)
 	UpdLangLevel(ctx context.Context, in *UpdLangLevelReq, opts ...grpc.CallOption) (*UpdLangLevelRes, error)
 	UpdStreak(ctx context.Context, in *UpdStreakReq, opts ...grpc.CallOption) (*UpdStreakRes, error)
+	UpdTaskID(ctx context.Context, in *UpdTaskIDReq, opts ...grpc.CallOption) (*UpdTaskIDRes, error)
 }
 
 type usersServiceClient struct {
@@ -83,6 +85,16 @@ func (c *usersServiceClient) UpdStreak(ctx context.Context, in *UpdStreakReq, op
 	return out, nil
 }
 
+func (c *usersServiceClient) UpdTaskID(ctx context.Context, in *UpdTaskIDReq, opts ...grpc.CallOption) (*UpdTaskIDRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdTaskIDRes)
+	err := c.cc.Invoke(ctx, UsersService_UpdTaskID_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersServiceServer is the server API for UsersService service.
 // All implementations must embed UnimplementedUsersServiceServer
 // for forward compatibility.
@@ -91,6 +103,7 @@ type UsersServiceServer interface {
 	UpdSystemPrompt(context.Context, *UpdSystemPromptReq) (*UpdSystemPromptRes, error)
 	UpdLangLevel(context.Context, *UpdLangLevelReq) (*UpdLangLevelRes, error)
 	UpdStreak(context.Context, *UpdStreakReq) (*UpdStreakRes, error)
+	UpdTaskID(context.Context, *UpdTaskIDReq) (*UpdTaskIDRes, error)
 	mustEmbedUnimplementedUsersServiceServer()
 }
 
@@ -112,6 +125,9 @@ func (UnimplementedUsersServiceServer) UpdLangLevel(context.Context, *UpdLangLev
 }
 func (UnimplementedUsersServiceServer) UpdStreak(context.Context, *UpdStreakReq) (*UpdStreakRes, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdStreak not implemented")
+}
+func (UnimplementedUsersServiceServer) UpdTaskID(context.Context, *UpdTaskIDReq) (*UpdTaskIDRes, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdTaskID not implemented")
 }
 func (UnimplementedUsersServiceServer) mustEmbedUnimplementedUsersServiceServer() {}
 func (UnimplementedUsersServiceServer) testEmbeddedByValue()                      {}
@@ -206,6 +222,24 @@ func _UsersService_UpdStreak_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UsersService_UpdTaskID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdTaskIDReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServiceServer).UpdTaskID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UsersService_UpdTaskID_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServiceServer).UpdTaskID(ctx, req.(*UpdTaskIDReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UsersService_ServiceDesc is the grpc.ServiceDesc for UsersService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,6 +262,10 @@ var UsersService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdStreak",
 			Handler:    _UsersService_UpdStreak_Handler,
+		},
+		{
+			MethodName: "UpdTaskID",
+			Handler:    _UsersService_UpdTaskID_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -389,6 +389,94 @@ func (*UpdStreakRes) Descriptor() ([]byte, []int) {
 	return file_users_proto_rawDescGZIP(), []int{7}
 }
 
+type UpdTaskIDReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Add           int32                  `protobuf:"varint,1,opt,name=add,proto3" json:"add,omitempty"`
+	RequestTrace  string                 `protobuf:"bytes,2,opt,name=request_trace,json=requestTrace,proto3" json:"request_trace,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdTaskIDReq) Reset() {
+	*x = UpdTaskIDReq{}
+	mi := &file_users_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdTaskIDReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdTaskIDReq) ProtoMessage() {}
+
+func (x *UpdTaskIDReq) ProtoReflect() protoreflect.Message {
+	mi := &file_users_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdTaskIDReq.ProtoReflect.Descriptor instead.
+func (*UpdTaskIDReq) Descriptor() ([]byte, []int) {
+	return file_users_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *UpdTaskIDReq) GetAdd() int32 {
+	if x != nil {
+		return x.Add
+	}
+	return 0
+}
+
+func (x *UpdTaskIDReq) GetRequestTrace() string {
+	if x != nil {
+		return x.RequestTrace
+	}
+	return ""
+}
+
+type UpdTaskIDRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdTaskIDRes) Reset() {
+	*x = UpdTaskIDRes{}
+	mi := &file_users_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdTaskIDRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdTaskIDRes) ProtoMessage() {}
+
+func (x *UpdTaskIDRes) ProtoReflect() protoreflect.Message {
+	mi := &file_users_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdTaskIDRes.ProtoReflect.Descriptor instead.
+func (*UpdTaskIDRes) Descriptor() ([]byte, []int) {
+	return file_users_proto_rawDescGZIP(), []int{9}
+}
+
 var File_users_proto protoreflect.FileDescriptor
 
 const file_users_proto_rawDesc = "" +
@@ -411,12 +499,17 @@ const file_users_proto_rawDesc = "" +
 	"\x05theme\x18\x02 \x01(\tR\x05theme\x12\x18\n" +
 	"\acounter\x18\x03 \x01(\x05R\acounter\x12#\n" +
 	"\rrequest_trace\x18\x04 \x01(\tR\frequestTrace\"\x0e\n" +
-	"\fUpdStreakRes2\xf7\x01\n" +
+	"\fUpdStreakRes\"E\n" +
+	"\fUpdTaskIDReq\x12\x10\n" +
+	"\x03add\x18\x01 \x01(\x05R\x03add\x12#\n" +
+	"\rrequest_trace\x18\x02 \x01(\tR\frequestTrace\"\x0e\n" +
+	"\fUpdTaskIDRes2\xae\x02\n" +
 	"\fUsersService\x12'\n" +
 	"\aGetUser\x12\r.users.GetReq\x1a\r.users.GetRes\x12G\n" +
 	"\x0fUpdSystemPrompt\x12\x19.users.UpdSystemPromptReq\x1a\x19.users.UpdSystemPromptRes\x12>\n" +
 	"\fUpdLangLevel\x12\x16.users.UpdLangLevelReq\x1a\x16.users.UpdLangLevelRes\x125\n" +
-	"\tUpdStreak\x12\x13.users.UpdStreakReq\x1a\x13.users.UpdStreakResB\x1fZ\x1dgenerated-users/;usersserviceb\x06proto3"
+	"\tUpdStreak\x12\x13.users.UpdStreakReq\x1a\x13.users.UpdStreakRes\x125\n" +
+	"\tUpdTaskID\x12\x13.users.UpdTaskIDReq\x1a\x13.users.UpdTaskIDResB\x1fZ\x1dgenerated-users/;usersserviceb\x06proto3"
 
 var (
 	file_users_proto_rawDescOnce sync.Once
@@ -430,7 +523,7 @@ func file_users_proto_rawDescGZIP() []byte {
 	return file_users_proto_rawDescData
 }
 
-var file_users_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_users_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_users_proto_goTypes = []any{
 	(*GetReq)(nil),             // 0: users.GetReq
 	(*GetRes)(nil),             // 1: users.GetRes
@@ -440,18 +533,22 @@ var file_users_proto_goTypes = []any{
 	(*UpdLangLevelRes)(nil),    // 5: users.UpdLangLevelRes
 	(*UpdStreakReq)(nil),       // 6: users.UpdStreakReq
 	(*UpdStreakRes)(nil),       // 7: users.UpdStreakRes
+	(*UpdTaskIDReq)(nil),       // 8: users.UpdTaskIDReq
+	(*UpdTaskIDRes)(nil),       // 9: users.UpdTaskIDRes
 }
 var file_users_proto_depIdxs = []int32{
 	0, // 0: users.UsersService.GetUser:input_type -> users.GetReq
 	2, // 1: users.UsersService.UpdSystemPrompt:input_type -> users.UpdSystemPromptReq
 	4, // 2: users.UsersService.UpdLangLevel:input_type -> users.UpdLangLevelReq
 	6, // 3: users.UsersService.UpdStreak:input_type -> users.UpdStreakReq
-	1, // 4: users.UsersService.GetUser:output_type -> users.GetRes
-	3, // 5: users.UsersService.UpdSystemPrompt:output_type -> users.UpdSystemPromptRes
-	5, // 6: users.UsersService.UpdLangLevel:output_type -> users.UpdLangLevelRes
-	7, // 7: users.UsersService.UpdStreak:output_type -> users.UpdStreakRes
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	8, // 4: users.UsersService.UpdTaskID:input_type -> users.UpdTaskIDReq
+	1, // 5: users.UsersService.GetUser:output_type -> users.GetRes
+	3, // 6: users.UsersService.UpdSystemPrompt:output_type -> users.UpdSystemPromptRes
+	5, // 7: users.UsersService.UpdLangLevel:output_type -> users.UpdLangLevelRes
+	7, // 8: users.UsersService.UpdStreak:output_type -> users.UpdStreakRes
+	9, // 9: users.UsersService.UpdTaskID:output_type -> users.UpdTaskIDRes
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -468,7 +565,7 @@ func file_users_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_users_proto_rawDesc), len(file_users_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

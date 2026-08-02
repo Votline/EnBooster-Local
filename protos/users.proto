@@ -30,9 +30,16 @@ message UpdStreakReq {
 }
 message UpdStreakRes {}
 
+message UpdTaskIDReq {
+  int32 add = 1;
+  string request_trace = 2;
+}
+message UpdTaskIDRes {}
+
 service UsersService {
   rpc GetUser (GetReq) returns (GetRes);
   rpc UpdSystemPrompt (UpdSystemPromptReq) returns (UpdSystemPromptRes);
   rpc UpdLangLevel (UpdLangLevelReq) returns (UpdLangLevelRes);
   rpc UpdStreak (UpdStreakReq) returns (UpdStreakRes);
+  rpc UpdTaskID (UpdTaskIDReq) returns (UpdTaskIDRes);
 }

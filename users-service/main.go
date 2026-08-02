@@ -199,3 +199,27 @@ func (s *usersserver) UpdStreak(ctx context.Context, req *pb.UpdStreakReq) (*pb.
 
 	return &pb.UpdStreakRes{}, nil
 }
+
+func (s *usersserver) UpdTaskID(ctx context.Context, req *pb.UpdTaskIDReq) (*pb.UpdTaskIDRes, error) {
+	const op = "usersserver.UpdTaskID"
+
+	var uuid int64 = 1
+	add := req.GetAdd()
+	reqTrace := req.GetRequestTrace()
+
+	s.log.Debug("UpdTaskID request",
+		zap.Int32("add", add),
+		zap.String("request_trace", reqTrace),
+		zap.String("op", op))
+
+	if err := s.db.UpdateTaskID(ctx, uuid, add, reqTrace); err != nil {
+		return nil, fmt.Errorf("%s: db update task id: %w", op, err)
+	}
+
+	s.log.Debug("Successfully updated task id",
+		zap.Int32("add", add),
+		zap.String("request_trace", reqTrace),
+		zap.String("op", op))
+
+	return &pb.UpdTaskIDRes{}, nil
+}
