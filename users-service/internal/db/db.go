@@ -263,3 +263,31 @@ func (d *DB) UpdateLangLevel(ctx context.Context, uuid int64, level, reqTrace st
 
 	return nil
 }
+
+func (d *DB) UpdateTaskID(ctx context.Context, uuid int64, add int32, reqTrace string) error {
+	const op = "db.UpdateLangLevel"
+
+	query, args, err := d.bd.Update("users").
+		Set("task_id", sq.Expr("task_id + ?", add)).
+		Where(sq.Eq{"uuid": uuid}).
+		ToSql()
+	if err != nil {
+		return fmt.Errorf("%s: build update query: %w", op, err)
+	}
+
+	d.log.Debug("UpdateTaskID query",
+		zap.String("query", query),
+		zap.String("request_trace", reqTrace),
+		zap.String("op", op))
+
+	if _, err := d.db.ExecContext(ctx, query, args...); err != nil {
+		return fmt.Errorf("%s: update task id: %w", op, err)
+	}
+
+	d.log.Debug("TaskID succesfully updated",
+		zap.String("query", query),
+		zap.String("request_trace", reqTrace),
+		zap.String("op", op))
+
+	return nil
+}
