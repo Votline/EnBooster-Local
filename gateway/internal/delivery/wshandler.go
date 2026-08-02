@@ -459,7 +459,7 @@ func (h *WSHandler) profile(buf *string, reqTrace string) error {
 	*buf = fmt.Sprintf(
 		"Your data:\n"+
 			"Level: %s\n"+
-			"Task position:%d\n"+
+			"Task position: %d\n"+
 			"Best theme: %s | %d\n"+
 			"Worst theme: %s | %d\n"+
 			"Streak: %d\nSystem prompt: %s",
