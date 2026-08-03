@@ -31,6 +31,7 @@ const (
 	StateSTS
 	StateTranscriptVoice
 	StateAiSetting
+	StateChangeModel
 )
 
 // StateManager is a struct that manages the state of the user

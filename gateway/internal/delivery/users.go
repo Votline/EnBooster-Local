@@ -315,6 +315,12 @@ func (h *WSHandler) handleUser(buf *string, auBuf *bytes.Buffer, uctx stm.UserCo
 		}
 		*buf = "Successfully changed prompt"
 		resetState = true
+	case stm.StateChangeModel:
+		if err := h.aisrv.ChangeModel(src.Text, reqTrace); err != nil {
+			return fmt.Errorf("%s: state changemodel: %w", op, err)
+		}
+		*buf = "Successfully changed model"
+		resetState = true
 	default:
 		*buf = "no handled"
 		resetState = true

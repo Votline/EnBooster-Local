@@ -98,7 +98,7 @@ data:
   REDIS_PING_TIMEOUT: "10"
   REDIS_TIMEOUT: "20"
   REDIS_CTX_TTL: "10"
-  AI_MODEL: "qwen_fine"
+  AI_MODEL: "qwen2.5:7b"
   AI_TIMEOUT: "60"
   AI_TEMP: "0.7"
   AI_NUM_PREDICTS: "512"
