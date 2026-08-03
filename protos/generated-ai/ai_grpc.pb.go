@@ -23,6 +23,7 @@ const (
 	AIService_GenerateAudio_FullMethodName  = "/ai.AIService/GenerateAudio"
 	AIService_RecognizeAudio_FullMethodName = "/ai.AIService/RecognizeAudio"
 	AIService_ClearAIContext_FullMethodName = "/ai.AIService/ClearAIContext"
+	AIService_ChangeModel_FullMethodName    = "/ai.AIService/ChangeModel"
 )
 
 // AIServiceClient is the client API for AIService service.
@@ -33,6 +34,7 @@ type AIServiceClient interface {
 	GenerateAudio(ctx context.Context, in *GenerateAudioReq, opts ...grpc.CallOption) (*GenerateAudioRes, error)
 	RecognizeAudio(ctx context.Context, in *RecognizeAudioReq, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RecognizeAudioRes], error)
 	ClearAIContext(ctx context.Context, in *ClearAIContextReq, opts ...grpc.CallOption) (*ClearAIContextRes, error)
+	ChangeModel(ctx context.Context, in *ChangeModelReq, opts ...grpc.CallOption) (*ChangeModelRes, error)
 }
 
 type aIServiceClient struct {
@@ -101,6 +103,16 @@ func (c *aIServiceClient) ClearAIContext(ctx context.Context, in *ClearAIContext
 	return out, nil
 }
 
+func (c *aIServiceClient) ChangeModel(ctx context.Context, in *ChangeModelReq, opts ...grpc.CallOption) (*ChangeModelRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ChangeModelRes)
+	err := c.cc.Invoke(ctx, AIService_ChangeModel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AIServiceServer is the server API for AIService service.
 // All implementations must embed UnimplementedAIServiceServer
 // for forward compatibility.
@@ -109,6 +121,7 @@ type AIServiceServer interface {
 	GenerateAudio(context.Context, *GenerateAudioReq) (*GenerateAudioRes, error)
 	RecognizeAudio(*RecognizeAudioReq, grpc.ServerStreamingServer[RecognizeAudioRes]) error
 	ClearAIContext(context.Context, *ClearAIContextReq) (*ClearAIContextRes, error)
+	ChangeModel(context.Context, *ChangeModelReq) (*ChangeModelRes, error)
 	mustEmbedUnimplementedAIServiceServer()
 }
 
@@ -130,6 +143,9 @@ func (UnimplementedAIServiceServer) RecognizeAudio(*RecognizeAudioReq, grpc.Serv
 }
 func (UnimplementedAIServiceServer) ClearAIContext(context.Context, *ClearAIContextReq) (*ClearAIContextRes, error) {
 	return nil, status.Error(codes.Unimplemented, "method ClearAIContext not implemented")
+}
+func (UnimplementedAIServiceServer) ChangeModel(context.Context, *ChangeModelReq) (*ChangeModelRes, error) {
+	return nil, status.Error(codes.Unimplemented, "method ChangeModel not implemented")
 }
 func (UnimplementedAIServiceServer) mustEmbedUnimplementedAIServiceServer() {}
 func (UnimplementedAIServiceServer) testEmbeddedByValue()                   {}
@@ -210,6 +226,24 @@ func _AIService_ClearAIContext_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AIService_ChangeModel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChangeModelReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AIServiceServer).ChangeModel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AIService_ChangeModel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AIServiceServer).ChangeModel(ctx, req.(*ChangeModelReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AIService_ServiceDesc is the grpc.ServiceDesc for AIService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -224,6 +258,10 @@ var AIService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ClearAIContext",
 			Handler:    _AIService_ClearAIContext_Handler,
+		},
+		{
+			MethodName: "ChangeModel",
+			Handler:    _AIService_ChangeModel_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

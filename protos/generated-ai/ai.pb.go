@@ -405,6 +405,94 @@ func (*ClearAIContextRes) Descriptor() ([]byte, []int) {
 	return file_ai_proto_rawDescGZIP(), []int{7}
 }
 
+type ChangeModelReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Model         string                 `protobuf:"bytes,1,opt,name=model,proto3" json:"model,omitempty"`
+	RequestTrace  string                 `protobuf:"bytes,2,opt,name=request_trace,json=requestTrace,proto3" json:"request_trace,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChangeModelReq) Reset() {
+	*x = ChangeModelReq{}
+	mi := &file_ai_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangeModelReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangeModelReq) ProtoMessage() {}
+
+func (x *ChangeModelReq) ProtoReflect() protoreflect.Message {
+	mi := &file_ai_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChangeModelReq.ProtoReflect.Descriptor instead.
+func (*ChangeModelReq) Descriptor() ([]byte, []int) {
+	return file_ai_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ChangeModelReq) GetModel() string {
+	if x != nil {
+		return x.Model
+	}
+	return ""
+}
+
+func (x *ChangeModelReq) GetRequestTrace() string {
+	if x != nil {
+		return x.RequestTrace
+	}
+	return ""
+}
+
+type ChangeModelRes struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChangeModelRes) Reset() {
+	*x = ChangeModelRes{}
+	mi := &file_ai_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangeModelRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangeModelRes) ProtoMessage() {}
+
+func (x *ChangeModelRes) ProtoReflect() protoreflect.Message {
+	mi := &file_ai_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChangeModelRes.ProtoReflect.Descriptor instead.
+func (*ChangeModelRes) Descriptor() ([]byte, []int) {
+	return file_ai_proto_rawDescGZIP(), []int{9}
+}
+
 var File_ai_proto protoreflect.FileDescriptor
 
 const file_ai_proto_rawDesc = "" +
@@ -431,12 +519,17 @@ const file_ai_proto_rawDesc = "" +
 	"\x11ClearAIContextReq\x12\x12\n" +
 	"\x04uuid\x18\x01 \x01(\x03R\x04uuid\x12#\n" +
 	"\rrequest_trace\x18\x02 \x01(\tR\frequestTrace\"\x13\n" +
-	"\x11ClearAIContextRes2\x86\x02\n" +
+	"\x11ClearAIContextRes\"K\n" +
+	"\x0eChangeModelReq\x12\x14\n" +
+	"\x05model\x18\x01 \x01(\tR\x05model\x12#\n" +
+	"\rrequest_trace\x18\x02 \x01(\tR\frequestTrace\"\x10\n" +
+	"\x0eChangeModelRes2\xbd\x02\n" +
 	"\tAIService\x12:\n" +
 	"\fGenerateText\x12\x13.ai.GenerateTextReq\x1a\x13.ai.GenerateTextRes0\x01\x12;\n" +
 	"\rGenerateAudio\x12\x14.ai.GenerateAudioReq\x1a\x14.ai.GenerateAudioRes\x12@\n" +
 	"\x0eRecognizeAudio\x12\x15.ai.RecognizeAudioReq\x1a\x15.ai.RecognizeAudioRes0\x01\x12>\n" +
-	"\x0eClearAIContext\x12\x15.ai.ClearAIContextReq\x1a\x15.ai.ClearAIContextResB\x19Z\x17generated-ai/;aiserviceb\x06proto3"
+	"\x0eClearAIContext\x12\x15.ai.ClearAIContextReq\x1a\x15.ai.ClearAIContextRes\x125\n" +
+	"\vChangeModel\x12\x12.ai.ChangeModelReq\x1a\x12.ai.ChangeModelResB\x19Z\x17generated-ai/;aiserviceb\x06proto3"
 
 var (
 	file_ai_proto_rawDescOnce sync.Once
@@ -450,7 +543,7 @@ func file_ai_proto_rawDescGZIP() []byte {
 	return file_ai_proto_rawDescData
 }
 
-var file_ai_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_ai_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_ai_proto_goTypes = []any{
 	(*GenerateTextReq)(nil),   // 0: ai.GenerateTextReq
 	(*GenerateTextRes)(nil),   // 1: ai.GenerateTextRes
@@ -460,18 +553,22 @@ var file_ai_proto_goTypes = []any{
 	(*RecognizeAudioRes)(nil), // 5: ai.RecognizeAudioRes
 	(*ClearAIContextReq)(nil), // 6: ai.ClearAIContextReq
 	(*ClearAIContextRes)(nil), // 7: ai.ClearAIContextRes
+	(*ChangeModelReq)(nil),    // 8: ai.ChangeModelReq
+	(*ChangeModelRes)(nil),    // 9: ai.ChangeModelRes
 }
 var file_ai_proto_depIdxs = []int32{
 	0, // 0: ai.AIService.GenerateText:input_type -> ai.GenerateTextReq
 	2, // 1: ai.AIService.GenerateAudio:input_type -> ai.GenerateAudioReq
 	4, // 2: ai.AIService.RecognizeAudio:input_type -> ai.RecognizeAudioReq
 	6, // 3: ai.AIService.ClearAIContext:input_type -> ai.ClearAIContextReq
-	1, // 4: ai.AIService.GenerateText:output_type -> ai.GenerateTextRes
-	3, // 5: ai.AIService.GenerateAudio:output_type -> ai.GenerateAudioRes
-	5, // 6: ai.AIService.RecognizeAudio:output_type -> ai.RecognizeAudioRes
-	7, // 7: ai.AIService.ClearAIContext:output_type -> ai.ClearAIContextRes
-	4, // [4:8] is the sub-list for method output_type
-	0, // [0:4] is the sub-list for method input_type
+	8, // 4: ai.AIService.ChangeModel:input_type -> ai.ChangeModelReq
+	1, // 5: ai.AIService.GenerateText:output_type -> ai.GenerateTextRes
+	3, // 6: ai.AIService.GenerateAudio:output_type -> ai.GenerateAudioRes
+	5, // 7: ai.AIService.RecognizeAudio:output_type -> ai.RecognizeAudioRes
+	7, // 8: ai.AIService.ClearAIContext:output_type -> ai.ClearAIContextRes
+	9, // 9: ai.AIService.ChangeModel:output_type -> ai.ChangeModelRes
+	5, // [5:10] is the sub-list for method output_type
+	0, // [0:5] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -488,7 +585,7 @@ func file_ai_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ai_proto_rawDesc), len(file_ai_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
