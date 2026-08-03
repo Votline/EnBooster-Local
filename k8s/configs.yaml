@@ -19,15 +19,12 @@ data:
 
   OLLAMA_PORT: "11434"
   AI_HOST: "ollama"
+  AI_PORT: "11434"
 
   REDIS_SM_ADDR: "redis-sm:6379"
   REDIS_LRN_ADDR: "redis-lrn:6379"
   REDIS_RL_ADDR: "redis-rl:6379"
   REDIS_AI_ADDR: "redis-ai:6379"
-
-  KAFKA_ADDR: "kafka:9092"
-  KAFKA_TOPIC_GTW_US: "user_answers"
-  KAFKA_SERVER_NAME: "kafka"
 ---
 apiVersion: v1
 kind: Secret
@@ -77,12 +74,6 @@ data:
   MAX_LIFETIME: "15"
   MAX_IDLETIME: "10"
   CTX_TIMEOUT: "10"
-  KAFKA_GROUP_ID: "gtw-us-streak"
-  KAFKA_MIN_BYTES: "1"
-  KAFKA_MAX_BYTES: "10000000"
-  KAFKA_SESSION_TIMEOUT: "6"
-  KAFKA_HEARTB_INTERVAL: "2"
-  KAFKA_MAX_WAIT: "100"
 ---
 apiVersion: v1
 kind: ConfigMap
