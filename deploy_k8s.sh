@@ -24,12 +24,12 @@ fi
 echo -e "${GREEN}==> 2. changed docker-cli to minikube...${NC}"
 eval $(minikube docker-env)
 
-echo -e "${GREEN}==> 3. building containers locally...${NC}"
-docker build -t frontend:latest ./frontend
-docker build -t gateway:latest -f ./gateway/Dockerfile .
-docker build -t users-service:latest -f ./users-service/Dockerfile .
-docker build -t learn-service:latest -f ./learn-service/Dockerfile .
-docker build -t ai-service:latest -f ./ai-service/Dockerfile .
+echo -e "${GREEN}==> 3. building containers locally (no cache)...${NC}"
+docker build --no-cache -t frontend:latest ./frontend
+docker build --no-cache -t gateway:latest -f ./gateway/Dockerfile .
+docker build --no-cache -t users-service:latest -f ./users-service/Dockerfile .
+docker build --no-cache -t learn-service:latest -f ./learn-service/Dockerfile .
+docker build --no-cache -t ai-service:latest -f ./ai-service/Dockerfile .
 
 echo -e "${GREEN}==> 4. loading images into minikube...${NC}"
 minikube image load frontend:latest
@@ -40,6 +40,13 @@ minikube image load ai-service:latest
 
 echo -e "${GREEN}==> 5. applying kubernetes-manifests...${NC}"
 kubectl apply -f k8s/
+
+echo -e "${GREEN}==> 5.5. restarting deployments...${NC}"
+kubectl rollout restart deployment/users-service
+kubectl rollout restart deployment/learn-service
+kubectl rollout restart deployment/ai-service
+kubectl rollout restart deployment/gateway
+kubectl rollout restart deployment/frontend
 
 echo -e "${GREEN}==> 6. waiting for gateway & frontend...${NC}"
 kubectl rollout status deployment/frontend --timeout=120s
