@@ -155,6 +155,10 @@ func NewRouter() (*Router, error) {
 	}, nil
 }
 
+func (r *Router) ChangeModel(newmodel string) {
+	r.ttt.reqBody.Model = newmodel
+}
+
 // GenerateText generates text from AI.
 func (r Router) GenerateText(prompt, systemPrompt string, userContext []int, buf *[]int, yield func(string)) error {
 	const op = "router.GenerateText"

@@ -80,7 +80,10 @@ func (ai *AIService) GenerateAudio(usrMsg, reqTrace string, yield func(res []byt
 		zap.String("reqTrace", reqTrace),
 		zap.Int("prompt_len", len(usrMsg)))
 
-	res, err := ai.client.GenerateAudio(context.Background(), &pb.GenerateAudioReq{
+	ctx, cancel := context.WithTimeout(context.Background(), ai.ctxTimeout)
+	defer cancel()
+
+	res, err := ai.client.GenerateAudio(ctx, &pb.GenerateAudioReq{
 		Text:         usrMsg,
 		RequestTrace: reqTrace,
 	})
@@ -107,7 +110,10 @@ func (ai *AIService) RecognizeAudio(oggBytes []byte, reqTrace string, yield func
 		zap.String("op", op),
 		zap.String("reqTrace", reqTrace))
 
-	stream, err := ai.client.RecognizeAudio(context.Background(), &pb.RecognizeAudioReq{
+	ctx, cancel := context.WithTimeout(context.Background(), ai.ctxTimeout)
+	defer cancel()
+
+	stream, err := ai.client.RecognizeAudio(ctx, &pb.RecognizeAudioReq{
 		AudioData:    oggBytes,
 		RequestTrace: reqTrace,
 	})
@@ -186,6 +192,36 @@ func (ai *AIService) GetLastMessage(buf *string, uctx stm.UserContext, reqTrace 
 	if chatSes.LastMessage == "" {
 		*buf = "No transcription found"
 	}
+
+	ai.log.Debug("Successfully get last message",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace))
+
+	return nil
+}
+
+// ChangeModel changed the AI model
+func (ai *AIService) ChangeModel(newModel string, reqTrace string) error {
+	const op = "ai.ChangeModel"
+
+	ai.log.Debug("Change model",
+		zap.String("op", op),
+		zap.String("newModel", newModel),
+		zap.String("reqTrace", reqTrace))
+
+	ctx, cancel := context.WithTimeout(context.Background(), ai.ctxTimeout)
+	defer cancel()
+
+	if _, err := ai.client.ChangeModel(ctx, &pb.ChangeModelReq{
+		Model:        newModel,
+		RequestTrace: reqTrace,
+	}); err != nil {
+		return fmt.Errorf("%s: rpc call: %w", op, err)
+	}
+
+	ai.log.Debug("Successfully changed model",
+		zap.String("op", op),
+		zap.String("reqTrace", reqTrace))
 
 	return nil
 }

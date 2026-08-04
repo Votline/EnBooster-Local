@@ -246,7 +246,6 @@ func (s *aiserver) ClearAIContext(ctx context.Context, req *pb.ClearAIContextReq
 
 	s.log.Debug("Clear AI context request received",
 		zap.String("op", op),
-		zap.Int64("uuid", uuid),
 		zap.String("request_trace", reqTrace))
 
 	if err := s.rdb.ClearAIContext(uuid); err != nil {
@@ -255,10 +254,30 @@ func (s *aiserver) ClearAIContext(ctx context.Context, req *pb.ClearAIContextReq
 
 	s.log.Debug("Clear AI context response sent",
 		zap.String("op", op),
-		zap.Int64("uuid", uuid),
 		zap.String("request_trace", reqTrace))
 
 	return &pb.ClearAIContextRes{}, nil
+}
+
+func (s *aiserver) ChangeModel(ctx context.Context, req *pb.ChangeModelReq) (*pb.ChangeModelRes, error) {
+	const op = "aiserver.ChangeModel"
+
+	model := req.GetModel()
+	reqTrace := req.GetRequestTrace()
+
+	s.log.Debug("Change model req",
+		zap.String("op", op),
+		zap.String("model", model),
+		zap.String("request_trace", reqTrace))
+
+	s.rt.ChangeModel(model)
+
+	s.log.Debug("Successfully changed model",
+		zap.String("op", op),
+		zap.String("model", model),
+		zap.String("request_trace", reqTrace))
+
+	return &pb.ChangeModelRes{}, nil
 }
 
 // decodeOggToPCM decodes OGG audio data to PCM via ffmpeg.
